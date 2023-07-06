@@ -7,7 +7,7 @@ INCLUDES_DIR = includes
 SRCS_DIR = srcs
 OBJS_DIR = objs
 
-SRCS = $(addprefix $(SRCS_DIR)/, main.cpp)
+SRCS = $(addprefix $(SRCS_DIR)/, main.cpp Server.cpp)
 OBJS = $(addprefix $(OBJS_DIR)/, $(notdir $(SRCS:.cpp=.o)))
 
 all : $(NAME)
@@ -24,6 +24,7 @@ clean :
 
 fclean : clean
 	rm -rf $(NAME)
+	rm -rf $(OBJS_DIR)
 
 re :
 	make fclean

@@ -1,4 +1,4 @@
-#include "../includes/irc.hpp"
+#include "Server.hpp"
 
 int	main(int argc, char **argv)
 {
@@ -8,7 +8,15 @@ int	main(int argc, char **argv)
 		std::cout << "Follow this format: ./ircserv <port> <password>" << std::endl;
 		return 1;
 	}
-	(void)argv;
+	
+	try
+	{
+		Server	server(argv[1], argv[2]);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 	
 	return 0;
 }
