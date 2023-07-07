@@ -10,6 +10,7 @@ class Parsing
 {
 public:
 	static std::vector<std::string> parsing(char *buf);
+	static int checkCommand(std::string cmd);
 };
 
 #endif
