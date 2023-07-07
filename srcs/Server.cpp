@@ -35,4 +35,21 @@ Server::Server(char *port, char *password)
 	int client_socket;
 	if ((client_socket = accept(_socket, (struct sockaddr*)&client_addr, &size)) == -1)
 		throw std::runtime_error("Failed to accept");
+
+	// 5. recv
+	char buf[1024];
+	int len;
+	if ((len = recv(client_socket, buf, 1024, 0)) == -1)
+		throw std::runtime_error("Failed to recv");
+	buf[len] = '\0';
+	std::cout << buf << std::endl;
+
+	// 6. send
+	if (send(client_socket, "Hello, world!\n", 14, 0) == -1)
+		throw std::runtime_error("Failed to send");
+	
+	// 7. close
+	close(client_socket);
+	close(_socket);
+
 }
