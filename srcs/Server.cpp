@@ -44,6 +44,11 @@ Server::Server(char *port, char *password)
 	buf[len] = '\0';
 	std::cout << buf << std::endl;
 
+	// 5.5. parsing
+	std::vector<std::string> token = Parsing::parsing(buf);
+	for (std::vector<std::string>::iterator it = token.begin(); it != token.end(); ++it)
+		std::cout << *it << std::endl;
+
 	// 6. send
 	if (send(client_socket, "Hello, world!\n", 14, 0) == -1)
 		throw std::runtime_error("Failed to send");
@@ -51,5 +56,4 @@ Server::Server(char *port, char *password)
 	// 7. close
 	close(client_socket);
 	close(_socket);
-
 }

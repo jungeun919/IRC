@@ -3,6 +3,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include "Parsing.hpp"
 # include <iostream>
 # include <sys/socket.h>
 # include <netinet/in.h>
