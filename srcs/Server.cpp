@@ -77,6 +77,9 @@ void	Server::run(void)
 {
 	initKqueue();
 
+	addEvents(_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+    std::cout << "echo server started" << std::endl;
+
 	while (true)
 	{
 		int n;
