@@ -8,6 +8,8 @@
 # include <iostream>
 # include <vector>
 
+class Server;
+
 class Command
 {
 public:

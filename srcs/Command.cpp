@@ -23,7 +23,7 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 void	Command::pass(Server *server, Client *client, std::string password)
 {	
 	if (client->getAuthorized() >= 1)
-		throw std::runtime_error("Already authorized");		
+		throw std::runtime_error("Already authorized");
 	
 	if (server->getPassword() == password)
 		client->setAuthorized(1);
