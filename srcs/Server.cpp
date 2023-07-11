@@ -29,6 +29,7 @@ Server::Server(char *port, char *password)
 	if (listen(_socket, 100) == -1) // max_client
 		throw std::runtime_error("Failed to listen");
 	
+	/*
 	// 4. accept
 	struct sockaddr_in client_addr;
 	unsigned int size = sizeof(client_addr);
@@ -56,6 +57,7 @@ Server::Server(char *port, char *password)
 	// 7. close
 	close(client_socket);
 	close(_socket);
+	*/
 }
 
 void	Server::initKqueue(void)
@@ -75,14 +77,19 @@ void	Server::addEvents(int socket, int16_t filter, uint16_t flags, uint32_t ffla
 
 void	Server::run(void)
 {
-	int n;
-	n = kevent(_kqueue, _changeList.data(), _changeList.size(), _eventList, MAX_EVENTS, NULL);
-	if (n == -1)
-		throw std::runtime_error("Failed to fetch event");
-	_changeList.clear();
+	initKqueue();
 
-	for (int i = 0; i < n; ++i)
-		handleEvent(_eventList[i]);
+	while (true)
+	{
+		int n;
+		n = kevent(_kqueue, _changeList.data(), _changeList.size(), _eventList, MAX_EVENTS, NULL);
+		if (n == -1)
+			throw std::runtime_error("Failed to fetch event");
+		_changeList.clear();
+
+		for (int i = 0; i < n; ++i)
+			handleEvent(_eventList[i]);
+	}
 }
 
 void	Server::handleEvent(struct kevent &event)
