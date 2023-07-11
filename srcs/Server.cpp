@@ -94,7 +94,8 @@ void	Server::handleEvent(struct kevent &event)
 		else
 		{
 			std::cout << "Client socket error";
-			// disconnect client 추가
+			// disconnect client 추가 (ok)
+			disconnectClient(event.ident);
 		}
 	}
 	else if (event.filter == EVFILT_READ)
@@ -112,13 +113,51 @@ void	Server::handleEvent(struct kevent &event)
 			// add event for client socket
 			addEvents(client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 			addEvents(client_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
-			// client 동작 추가
+			// client 동작 추가 (ok)
+			Client* client = new Client(client_socket);
+			_clientList.insert(std::make_pair(client_socket, client));
 		}
-		// else
-			// read data from client 코드 추가
+		else
+		{
+			// read data from client 코드 추가 (ok)
+			char buff[BUFFER_SIZE];
+			memset(buff, 0, BUFFER_SIZE);
+
+			int bytes = recv(event.ident, buff, BUFFER_SIZE, 0);
+			if (bytes <= 0)
+				disconnectClient(event.ident);
+			else
+			{
+				std::map<int, Client*>::iterator it = _clientList.find(event.ident);
+				if (it == _clientList.end())
+					return ;
+				
+				buff[bytes] = '\0';
+				it->second->addReadBuff(static_cast<std::string>(buff));
+				// parsing string & command 동작 코드 추가
+			}
+		}
+
 	}
 	else if (event.filter == EVFILT_WRITE)
 	{
-		// send data to client 코드 추가
+		// send data to client 코드 추가 (ok)
+		std::map<int, Client*>::iterator it = _clientList.find(event.ident);
+		if (it == _clientList.end())
+			return ;
+		
+		std::string& message = it->second->getWriteBuff();
+		int bytes = send(event.ident, message.c_str(), message.length(), 0);
+		if (bytes <= 0)
+			disconnectClient(event.ident);
 	}
+}
+
+void	Server::disconnectClient(uintptr_t clientFd)
+{
+	std::map<int, Client*>::iterator it = _clientList.find(clientFd);
+	if (it == _clientList.end())
+		return ;
+	_clientList.erase(clientFd);
+	delete it->second;
 }
