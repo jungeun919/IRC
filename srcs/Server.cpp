@@ -47,8 +47,6 @@ Server::Server(char *port, char *password)
 
 	// 5.5. parsing
 	std::vector<std::string> token = Parsing::parsing(buf);
-	for (std::vector<std::string>::iterator it = token.begin(); it != token.end(); ++it)
-		std::cout << *it << std::endl;
 
 	// 6. send
 	if (send(client_socket, "Hello, world!\n", 14, 0) == -1)
@@ -142,6 +140,11 @@ void	Server::handleEvent(struct kevent &event)
 				buff[bytes] = '\0';
 				it->second->addReadBuff(static_cast<std::string>(buff));
 				// parsing string & command 동작 코드 추가
+				std::vector<std::string> token = Parsing::parsing(buff);
+			if (token[0] == "1")
+				Command::runCommand(token, this, it->second);
+			else
+				std::cout << "not command" << std::endl;
 			}
 		}
 
@@ -167,4 +170,21 @@ void	Server::disconnectClient(uintptr_t clientFd)
 		return ;
 	_clientList.erase(clientFd);
 	delete it->second;
+}
+
+std::string Server::getPassword(void)
+{
+	return _password;
+}
+
+int Server::checkNickName(std::string nickname)
+{
+	std::map<int, Client*>::iterator it = _clientList.begin();
+	while (it != _clientList.end())
+	{
+		if (it->second->getNickName() == nickname)
+			return 0;
+		it++;
+	}
+	return 1;
 }

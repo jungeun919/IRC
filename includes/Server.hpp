@@ -8,6 +8,7 @@
 
 # include "Parsing.hpp"
 # include "Client.hpp"
+# include "Command.hpp"
 
 # include <iostream>
 # include <sys/socket.h>
@@ -34,7 +35,6 @@ class Server
 		struct kevent				_eventList[MAX_EVENTS];
 
 		std::map<int, Client*>		_clientList;
-	
 	public:
 		Server(char *port, char *password);
 
@@ -43,6 +43,9 @@ class Server
 		void	run(void);
 		void	handleEvent(struct kevent &event);
 		void	disconnectClient(uintptr_t clientFd);
+
+		std::string 	getPassword(void);
+		int 			checkNickName(std::string nickName);
 };
 
 #endif

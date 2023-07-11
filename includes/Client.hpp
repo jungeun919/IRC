@@ -11,6 +11,9 @@ class Client
 		int			_fd;
 		std::string	_readBuff;
 		std::string	_writeBuff;
+
+		int 		_authorized;
+		std::string _nickName;
 	
 	public:
 		Client(int fd);
@@ -20,6 +23,12 @@ class Client
 		
 		std::string&	getReadBuff(void);
 		std::string&	getWriteBuff(void);
+
+		int				getAuthorized(void);
+		void			setAuthorized(int authorized);
+
+		std::string&	getNickName(void);
+		void			setNickName(std::string nickName);
 };
 
 #endif
