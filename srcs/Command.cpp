@@ -32,7 +32,7 @@ void	Command::pass(Server *server, Client *client, std::string password)
 
 void	Command::nick(Server *server, Client *client, std::string nickName)
 {
-	if (client->getAuthorized() == 0)
+	if (!client->getAuthorized())
 		throw std::runtime_error("Not authorized");
 	
 	if (server->checkNickName(nickName))

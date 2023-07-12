@@ -49,17 +49,23 @@ void	Server::run(void)
 
 	addEvents(_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
     std::cout << "echo server started" << std::endl;
-
 	while (true)
 	{
-		int n;
-		n = kevent(_kqueue, _changeList.data(), _changeList.size(), _eventList, MAX_EVENTS, NULL);
-		if (n == -1)
-			throw std::runtime_error("Failed to fetch event");
-		_changeList.clear();
+		try
+		{
+			int n;
+			n = kevent(_kqueue, _changeList.data(), _changeList.size(), _eventList, MAX_EVENTS, NULL);
+			if (n == -1)
+				throw std::runtime_error("Failed to fetch event");
+			_changeList.clear();
 
-		for (int i = 0; i < n; ++i)
-			handleEvent(_eventList[i]);
+			for (int i = 0; i < n; ++i)
+				handleEvent(_eventList[i]);
+		}
+		catch (std::exception &e)
+		{
+			std::cout << e.what() << std::endl;
+		}
 	}
 }
 
