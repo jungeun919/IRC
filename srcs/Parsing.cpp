@@ -14,6 +14,13 @@ std::vector<std::string> Parsing::parsing(char *buf)
 		token.push_back(static_cast<std::string>(ptr));
 		ptr = strtok(NULL, " ");
 	}
+
+	if (!token.empty())
+	{
+  		std::string& lastElement = token.back();
+  		if (!lastElement.empty())
+    		lastElement = lastElement.substr(0, lastElement.size() - 1);
+	}
 	return token;
 }
 

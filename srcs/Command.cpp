@@ -24,12 +24,10 @@ void	Command::pass(Server *server, Client *client, std::string password)
 {	
 	if (client->getAuthorized() >= 1)
 		throw std::runtime_error("Already authorized");
-	
 	if (server->getPassword() == password)
 		client->setAuthorized(1);
 	else
 		throw std::runtime_error("Wrong password");
-	//std::cout << "PASS" << std::endl;
 }
 
 void	Command::nick(Server *server, Client *client, std::string nickName)
@@ -41,7 +39,6 @@ void	Command::nick(Server *server, Client *client, std::string nickName)
 		throw std::runtime_error("NickName already exist");
 	
 	client->setNickName(nickName);
-	//std::cout << "NICK" << std::endl;
 }
 
 void	Command::user(int fd, std::string userName)

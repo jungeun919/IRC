@@ -15,7 +15,6 @@ Server::Server(char *port, char *password)
 	if (_port < 0 || _port > 65536)
 		throw std::range_error("Invalid port range");
 	_password = static_cast<std::string>(password);
-
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
@@ -28,34 +27,6 @@ Server::Server(char *port, char *password)
 	// 3. listen
 	if (listen(_socket, 100) == -1) // max_client
 		throw std::runtime_error("Failed to listen");
-	
-	/*
-	// 4. accept
-	struct sockaddr_in client_addr;
-	unsigned int size = sizeof(client_addr);
-	int client_socket;
-	if ((client_socket = accept(_socket, (struct sockaddr*)&client_addr, &size)) == -1)
-		throw std::runtime_error("Failed to accept");
-
-	// 5. recv
-	char buf[1024];
-	int len;
-	if ((len = recv(client_socket, buf, 1024, 0)) == -1)
-		throw std::runtime_error("Failed to recv");
-	buf[len] = '\0';
-	std::cout << buf << std::endl;
-
-	// 5.5. parsing
-	std::vector<std::string> token = Parsing::parsing(buf);
-
-	// 6. send
-	if (send(client_socket, "Hello, world!\n", 14, 0) == -1)
-		throw std::runtime_error("Failed to send");
-	
-	// 7. close
-	close(client_socket);
-	close(_socket);
-	*/
 }
 
 void	Server::initKqueue(void)
@@ -70,7 +41,6 @@ void	Server::addEvents(int socket, int16_t filter, uint16_t flags, uint32_t ffla
 
     EV_SET(&event, socket, filter, flags, fflags, data, udata);
     _changeList.push_back(event);
-	std::cout << event.data << std::endl;
 }
 
 void	Server::run(void)
@@ -132,7 +102,7 @@ void	Server::handleEvent(struct kevent &event)
 			memset(buff, 0, BUFFER_SIZE);
 
 			int bytes = recv(event.ident, buff, BUFFER_SIZE, 0);
-			if (bytes <= 0)
+			if (bytes < 0)
 				disconnectClient(event.ident);
 			else
 			{
@@ -161,7 +131,7 @@ void	Server::handleEvent(struct kevent &event)
 		
 		std::string& message = it->second->getWriteBuff();
 		int bytes = send(event.ident, message.c_str(), message.length(), 0);
-		if (bytes <= 0)
+		if (bytes < 0)
 			disconnectClient(event.ident);
 	}
 }
