@@ -45,6 +45,8 @@ class Server
 		void	disconnectClient(uintptr_t clientFd);
 
 		std::string 	getPassword(void);
+		int				checkUserName(std::string userName);
+		int				checkRealName(std::string channelName);
 		int 			checkNickName(std::string nickName);
 };
 

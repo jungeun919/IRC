@@ -9,10 +9,15 @@ std::vector<std::string> Parsing::parsing(char *buf)
 	else
 		token.push_back("0");
 	
+	int i = 0;
 	while (ptr != NULL)
 	{
 		token.push_back(static_cast<std::string>(ptr));
-		ptr = strtok(NULL, " ");
+		if (i < 5)
+			ptr = strtok(NULL, " ");
+		else
+			ptr = strtok(NULL, "");
+		i++;
 	}
 
 	if (!token.empty())

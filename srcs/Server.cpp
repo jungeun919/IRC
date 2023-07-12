@@ -118,6 +118,7 @@ void	Server::handleEvent(struct kevent &event)
 				
 				buff[bytes] = '\0';
 				it->second->addReadBuff(static_cast<std::string>(buff));
+				std::cout << it->first << " : " << buff;
 				// parsing string & command 동작 코드 추가
 				std::vector<std::string> token = Parsing::parsing(buff);
 			if (token[0] == "1")
@@ -156,14 +157,38 @@ std::string Server::getPassword(void)
 	return _password;
 }
 
-int Server::checkNickName(std::string nickname)
+int Server::checkUserName(std::string userName)
 {
 	std::map<int, Client*>::iterator it = _clientList.begin();
 	while (it != _clientList.end())
 	{
-		if (it->second->getNickName() == nickname)
-			return 0;
+		if (it->second->getUserName() == userName)
+			return 1;
 		it++;
 	}
-	return 1;
+	return 0;
+}
+
+int Server::checkRealName(std::string realName)
+{
+	std::map<int, Client*>::iterator it = _clientList.begin();
+	while (it != _clientList.end())
+	{
+		if (it->second->getRealName() == realName)
+			return 1;
+		it++;
+	}
+	return 0;
+}
+
+int Server::checkNickName(std::string nickName)
+{
+	std::map<int, Client*>::iterator it = _clientList.begin();
+	while (it != _clientList.end())
+	{
+		if (it->second->getNickName() == nickName)
+			return 1;
+		it++;
+	}
+	return 0;
 }

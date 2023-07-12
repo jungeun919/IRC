@@ -36,6 +36,26 @@ void Client::setAuthorized(int authorized)
 	_authorized = authorized;
 }
 
+std::string& Client::getUserName(void)
+{
+	return _userName;
+}
+
+void Client::setUserName(std::string userName)
+{
+	_userName = userName;
+}
+
+std::string& Client::getRealName(void)
+{
+	return _realName;
+}
+
+void Client::setRealName(std::string realName)
+{
+	_realName = realName;
+}
+
 std::string& Client::getNickName(void)
 {
 	return _nickName;

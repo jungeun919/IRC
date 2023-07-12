@@ -12,8 +12,13 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 			throw std::runtime_error("Invalid argument");
 		nick(server, client, token[2]);
 	}
-	else if (token[1] == "USER")
-		user(0, token[1]);
+	else if (token[1] == "USER") {
+		if (token.size() != 6)
+			throw std::runtime_error("Invalid argument");
+		if (token[3] != "0" || token[4] != "*" || token[5][0] != ':')
+			throw std::runtime_error("Invalid argument");
+		user(server, client, token[2], token[5].substr(1));
+	}
 	else if (token[1] == "JOIN")
 		join(0, token[1]);
 	else if (token[1] == "PRIVMSG")
@@ -41,11 +46,19 @@ void	Command::nick(Server *server, Client *client, std::string nickName)
 	client->setNickName(nickName);
 }
 
-void	Command::user(int fd, std::string userName)
+void	Command::user(Server *server, Client *client, std::string userName, std::string realName)
 {
-	static_cast<void>(fd);
-	static_cast<void>(userName);
-	std::cout << "USER" << std::endl;
+	if (!client->getAuthorized())
+		throw std::runtime_error("Not authorized");
+	
+	if (server->checkUserName(userName))
+		throw std::runtime_error("UserName already exist");
+
+	if (server->checkRealName(realName))
+		throw std::runtime_error("RealName already exist");
+	std::cout << realName << std::endl;
+	client->setUserName(userName);
+	client->setRealName(realName);
 }
 
 void	Command::join(int fd, std::string channelName)
