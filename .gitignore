@@ -4,3 +4,6 @@ objs
 
 # Executables
 ircserv
+
+# vscode
+.vscode
