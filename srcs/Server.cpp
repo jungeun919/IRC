@@ -67,6 +67,7 @@ void	Server::run(void)
 			{
 				std::cout << e.what() << std::endl;
 				std::string msg = e.what();
+				msg = "[Server] " + msg + "\n";
 				if (send(_eventList[i].ident, msg.c_str(), msg.length(), 0) == -1)
 					throw std::runtime_error("Failed to send");
 			}
@@ -218,4 +219,16 @@ std::map<int, Client*> Server::getClientList(void)
 void Server::addChannel(std::string channelName)
 {
 	_channelList.insert(std::make_pair(channelName, new Channel(channelName)));
+}
+
+int Server::getFdByNickName(std::string nickName)
+{
+	std::map<int, Client*>::iterator it = _clientList.begin();
+	while (it != _clientList.end())
+	{
+		if (it->second->getNickName() == nickName)
+			return it->first;
+		it++;
+	}
+	return -1;
 }

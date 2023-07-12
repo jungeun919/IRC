@@ -26,8 +26,11 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 			throw std::runtime_error("Invalid argument");
 		join(server, client, token);
 	}
-	else if (token[1] == "PRIVMSG")
-		privmsg(0, token[2], token[3]);
+	else if (token[1] == "PRIVMSG") {
+		if (token.size() != 4)
+			throw std::runtime_error("Invalid argument");
+		privmsg(server, client, token[2], token[3]);
+	}
 }
 
 void	Command::pass(Server *server, Client *client, std::string password)
@@ -95,10 +98,31 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 	}
 }
 
-void	Command::privmsg(int fd, std::string channelName, std::string message)
+void	Command::privmsg(Server *server, Client *client, std::string target, std::string message)
 {
-	static_cast<void>(fd);
-	static_cast<void>(channelName);
-	static_cast<void>(message);
-	std::cout << "PRIVMSG" << std::endl;
+	if (!client->getAuthorized())
+		throw std::runtime_error("Not authorized");
+	message = client->getNickName() + ": " + message + "\n";
+	if (target[0] == '#')
+	{
+		target = target.substr(1);
+		if (!server->checkChannelName(target))
+			throw std::runtime_error("Channel doesn't exist");
+		
+		std::map<int, Client*> clientList = server->_channelList[target]->_clientList;
+		std::map<int, Client*>::iterator it = clientList.begin();
+		while (it != clientList.end())
+		{
+			if (!send((*it).second->getFd(), message.c_str(), message.length(), 0))
+				throw std::runtime_error("User not connected");
+			it++;
+		}
+	}
+	else
+	{
+		if (!server->checkNickName(target))
+			throw std::runtime_error("NickName doesn't exist");
+		if (!send(server->getFdByNickName(target), message.c_str(), message.length(), 0))
+			throw std::runtime_error("User not connected");
+	}
 }

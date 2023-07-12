@@ -55,6 +55,8 @@ class Server
 
 		std::map<int, Client*>		getClientList(void);
 		void			addChannel(std::string channelName);
+
+		int				getFdByNickName(std::string nickName);
 };
 
 #endif
