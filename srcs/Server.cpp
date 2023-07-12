@@ -51,20 +51,25 @@ void	Server::run(void)
     std::cout << "echo server started" << std::endl;
 	while (true)
 	{
-		try
+		int n;
+		n = kevent(_kqueue, _changeList.data(), _changeList.size(), _eventList, MAX_EVENTS, NULL);
+		if (n == -1)
+			throw std::runtime_error("Failed to fetch event");
+		_changeList.clear();
+		
+		for (int i = 0; i < n; ++i)
 		{
-			int n;
-			n = kevent(_kqueue, _changeList.data(), _changeList.size(), _eventList, MAX_EVENTS, NULL);
-			if (n == -1)
-				throw std::runtime_error("Failed to fetch event");
-			_changeList.clear();
-
-			for (int i = 0; i < n; ++i)
+			try
+			{
 				handleEvent(_eventList[i]);
-		}
-		catch (std::exception &e)
-		{
-			std::cout << e.what() << std::endl;
+			}
+			catch (std::exception &e)
+			{
+				std::cout << e.what() << std::endl;
+				std::string msg = e.what();
+				if (send(_eventList[i].ident, msg.c_str(), msg.length(), 0) == -1)
+					throw std::runtime_error("Failed to send");
+			}
 		}
 	}
 }
