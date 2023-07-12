@@ -192,3 +192,25 @@ int Server::checkNickName(std::string nickName)
 	}
 	return 0;
 }
+
+int Server::checkChannelName(std::string channelName)
+{
+	std::map<std::string, Channel*>::iterator it = _channelList.begin();
+	while (it != _channelList.end())
+	{
+		if (it->first == channelName)
+			return 1;
+		it++;
+	}
+	return 0;
+}
+
+std::map<int, Client*> Server::getClientList(void)
+{
+	return _clientList;
+}
+
+void Server::addChannel(std::string channelName)
+{
+	_channelList.insert(std::make_pair(channelName, new Channel(channelName)));
+}

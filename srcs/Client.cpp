@@ -6,6 +6,11 @@ Client::Client(int fd)
 	_authorized = 0;
 }
 
+int	Client::getFd(void)
+{
+	return _fd;
+}
+
 void	Client::addReadBuff(std::string message)
 {
 	_readBuff += message;
@@ -64,4 +69,14 @@ std::string& Client::getNickName(void)
 void Client::setNickName(std::string nickName)
 {
 	_nickName = nickName;
+}
+
+std::map<std::string, Channel*>& Client::getChannelList(void)
+{
+	return _channelList;
+}
+
+void Client::addChannel(std::string channelName, Channel* channel)
+{
+	_channelList.insert(std::pair<std::string, Channel*>(channelName, channel));
 }

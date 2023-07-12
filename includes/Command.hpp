@@ -17,7 +17,7 @@ public:
 	static void	pass(Server *server, Client *client, std::string password);
 	static void	nick(Server *server, Client *client, std::string nickName);
 	static void	user(Server *server, Client *client, std::string userName, std::string realName);
-	static void	join(int fd, std::string channelName);
+	static void	join(Server *server, Client *client, std::vector<std::string> token);
 	static void	privmsg(int fd, std::string channelName, std::string message);
 };
 

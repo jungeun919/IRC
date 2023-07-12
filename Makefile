@@ -7,7 +7,7 @@ INCLUDES_DIR = includes
 SRCS_DIR = srcs
 OBJS_DIR = objs
 
-SRCS = $(addprefix $(SRCS_DIR)/, main.cpp Server.cpp Client.cpp Parsing.cpp Command.cpp)
+SRCS = $(addprefix $(SRCS_DIR)/, main.cpp Server.cpp Client.cpp Parsing.cpp Command.cpp Channel.cpp)
 OBJS = $(addprefix $(OBJS_DIR)/, $(notdir $(SRCS:.cpp=.o)))
 
 all : $(NAME)

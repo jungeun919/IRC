@@ -19,8 +19,13 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 			throw std::runtime_error("Invalid argument");
 		user(server, client, token[2], token[5].substr(1));
 	}
-	else if (token[1] == "JOIN")
-		join(0, token[1]);
+	else if (token[1] == "JOIN") {
+		if (token.size() != 3 && token.size() != 4)
+			throw std::runtime_error("Invalid argument");
+		if (token[2][0] != '#')
+			throw std::runtime_error("Invalid argument");
+		join(server, client, token);
+	}
 	else if (token[1] == "PRIVMSG")
 		privmsg(0, token[2], token[3]);
 }
@@ -56,16 +61,38 @@ void	Command::user(Server *server, Client *client, std::string userName, std::st
 
 	if (server->checkRealName(realName))
 		throw std::runtime_error("RealName already exist");
-	std::cout << realName << std::endl;
 	client->setUserName(userName);
 	client->setRealName(realName);
 }
 
-void	Command::join(int fd, std::string channelName)
+void	Command::join(Server *server, Client *client, std::vector<std::string> token)
 {
-	static_cast<void>(fd);
-	static_cast<void>(channelName);
-	std::cout << "JOIN" << std::endl;
+	if (!client->getAuthorized())
+		throw std::runtime_error("Not authorized");
+	
+	std::string channelName = token[2].substr(1);
+	std::string key = "";
+
+	if (token.size() == 4)
+		key = token[3];
+	
+	if (!server->checkChannelName(channelName))
+	{
+		server->addChannel(channelName);
+		server->_channelList[channelName]->addClient(client);
+		client->addChannel(channelName, server->_channelList[channelName]);
+		server->_channelList[channelName]->setKey(key);
+	}
+	else
+	{
+		if (server->_channelList[channelName]->getKey() == key)
+		{
+			server->_channelList[channelName]->addClient(client);
+			client->addChannel(channelName, server->_channelList[channelName]);
+		}
+		else
+			throw std::runtime_error("Wrong key");
+	}
 }
 
 void	Command::privmsg(int fd, std::string channelName, std::string message)

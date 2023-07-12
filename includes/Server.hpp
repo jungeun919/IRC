@@ -9,6 +9,7 @@
 # include "Parsing.hpp"
 # include "Client.hpp"
 # include "Command.hpp"
+# include "Channel.hpp"
 
 # include <iostream>
 # include <sys/socket.h>
@@ -36,6 +37,8 @@ class Server
 
 		std::map<int, Client*>		_clientList;
 	public:
+		std::map<std::string, Channel*>	_channelList;
+		
 		Server(char *port, char *password);
 
 		void	initKqueue(void);
@@ -48,6 +51,10 @@ class Server
 		int				checkUserName(std::string userName);
 		int				checkRealName(std::string channelName);
 		int 			checkNickName(std::string nickName);
+		int 			checkChannelName(std::string channelName);
+
+		std::map<int, Client*>		getClientList(void);
+		void			addChannel(std::string channelName);
 };
 
 #endif

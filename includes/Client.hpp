@@ -3,7 +3,12 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
+# include "Channel.hpp"
+
+# include <map>
 # include <iostream>
+
+class Channel;
 
 class Client
 {
@@ -16,10 +21,13 @@ class Client
 		std::string _userName;
 		std::string _realName;
 		std::string _nickName;
-	
 	public:
+		std::map<std::string, Channel*> _channelList;
+
 		Client(int fd);
 
+		int				getFd(void);
+		
 		void			addReadBuff(std::string message);
 		void			addWriteBuff(std::string message);
 		
@@ -37,6 +45,9 @@ class Client
 
 		std::string&	getNickName(void);
 		void			setNickName(std::string nickName);
+
+		std::map<std::string, Channel*>&	getChannelList(void);
+		void			addChannel(std::string channelName, Channel* channel);
 };
 
 #endif
