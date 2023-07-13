@@ -57,6 +57,7 @@ class Server
 		void			addChannel(std::string channelName);
 
 		int				getFdByNickName(std::string nickName);
+		Channel*		getChannelByChannelName(std::string channelName);
 };
 
 #endif

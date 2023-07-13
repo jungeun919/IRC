@@ -21,6 +21,9 @@ public:
 	static void	user(Server *server, Client *client, std::string userName, std::string realName);
 	static void	join(Server *server, Client *client, std::vector<std::string> token);
 	static void	privmsg(Server *server, Client *client, std::string target, std::string message);
+	static void kick(Server *server, Client *client, std::vector<std::string> token);
+
+	static std::vector<std::string>	split(std::string str, std::string delimiter);
 };
 
 #endif

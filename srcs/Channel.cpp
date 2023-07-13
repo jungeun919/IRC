@@ -27,15 +27,11 @@ void	Channel::removeClient(int clientFd)
 	_clientList.erase(clientFd);
 }
 
-void	Channel::broadcast(std::string message, Client* client)
+void	Channel::broadcast(std::string message)
 {
 	std::map<int, Client*>::iterator it;
 	for (it = _clientList.begin(); it != _clientList.end(); ++it)
-	{
-		if (it->second == client)
-			continue ;
 		it->second->addWriteBuff(message);
-	}
 }
 
 std::string Channel::getKey(void)
@@ -46,4 +42,37 @@ std::string Channel::getKey(void)
 void	Channel::setKey(std::string key)
 {
 	_key = key;
+}
+
+int	Channel::checkClientExistByClientFd(int clientFd)
+{
+	std::map<int, Client*>::iterator it;
+	for (it = _clientList.begin(); it != _clientList.end(); ++it)
+	{
+		if (it->second->getFd() == clientFd)
+			return 1;
+	}
+	return 0;
+}
+
+int	Channel::isOperator(int clientFd)
+{
+	std::map<int, Client*>::iterator it;
+	for (it = _operatorList.begin(); it != _operatorList.end(); ++it)
+	{
+		if (it->second->getFd() == clientFd)
+			return 1;
+	}
+	return 0;
+}
+
+Client*	Channel::getClientByNickname(std::string nickName)
+{
+	std::map<int, Client*>::iterator it;
+	for (it = _clientList.begin(); it != _clientList.end(); ++it)
+	{
+		if (it->second->getNickName() == nickName)
+			return it->second;
+	}
+	return NULL;
 }

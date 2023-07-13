@@ -48,6 +48,7 @@ class Client
 
 		std::map<std::string, Channel*>&	getChannelList(void);
 		void			addChannel(std::string channelName, Channel* channel);
+		void			removeChannel(std::string channelName);
 };
 
 #endif

@@ -31,6 +31,9 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 			throw std::runtime_error("Invalid argument");
 		privmsg(server, client, token[2], token[3]);
 	}
+	else if (token[1] == "KICK") {
+		kick(server, client, token);
+	}
 }
 
 void	Command::pass(Server *server, Client *client, std::string password)
@@ -125,4 +128,68 @@ void	Command::privmsg(Server *server, Client *client, std::string target, std::s
 		if (!send(server->getFdByNickName(target), message.c_str(), message.length(), 0))
 			throw std::runtime_error("User not connected");
 	}
+}
+
+void	Command::kick(Server *server, Client *client, std::vector<std::string> token)
+{
+	if (token.size() != 4 && token.size() != 5)
+		throw std::runtime_error("Invalid argument");
+	if (token[2][0] != '#')
+		throw std::runtime_error("Invalid argument");
+	if (token.size() == 5)
+	{
+		if (token[4][0] != ':')
+			throw std::runtime_error("Invalid argument");
+	}
+	
+	if (!client->getAuthorized())
+		throw std::runtime_error("Not authorized");
+	
+	// 채널명 있는지 확인
+	Channel *channel = server->getChannelByChannelName(token[2].substr(1));
+	if (channel == NULL)
+		throw std::runtime_error("Channel doesn't exist");
+	
+	// 입력 유저가 channel에 있는지, operator인지 확인
+	if (channel->checkClientExistByClientFd(client->getFd()) == 0)
+		throw std::runtime_error("User is not in channel");
+	if (channel->isOperator(client->getFd()) == 0)
+		throw std::runtime_error("User is not operator");
+	
+	// kickClients (token[3] : nickname list)
+	std::vector<std::string> kickClients = split(token[3], ",");
+	for (size_t i = 0; i < kickClients.size(); ++i) {
+   		std::cout << "kickClient: " << kickClients[i] << " ";
+	}
+	std::cout << std::endl;
+
+	std::vector<std::string>::iterator it;
+	for (it = kickClients.begin(); it != kickClients.end(); ++it)
+	{
+		Client* kickClient = channel->getClientByNickname(*it);
+		if (!kickClient)
+			continue ;
+		channel->removeClient(kickClient->getFd());
+		kickClient->removeChannel(token[2].substr(1));
+		std::cout << "kick " << kickClient->getFd() << " from " << token[2] << std::endl;
+	}
+
+	std::string message = "There is no reason";
+	if (token.size() == 5)
+		message = client->getNickName() + ": " + token[4].substr(1) + '\n';
+	// broadcast message
+}
+
+std::vector<std::string>	Command::split(std::string str, std::string delimiter) {
+	std::vector<std::string> ret;
+
+	size_t pos = 0;
+	while ((pos = str.find(delimiter)) != std::string::npos)
+	{
+		ret.push_back(str.substr(0, pos));
+		str.erase(0, pos + delimiter.length());
+	}
+	if (!str.empty())
+		ret.push_back(str);
+	return ret;
 }

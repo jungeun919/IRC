@@ -80,3 +80,11 @@ void Client::addChannel(std::string channelName, Channel* channel)
 {
 	_channelList.insert(std::pair<std::string, Channel*>(channelName, channel));
 }
+
+void Client::removeChannel(std::string channelName)
+{
+	std::map<std::string, Channel*>::iterator it = _channelList.find(channelName);
+	if (it == _channelList.end())
+		return ;
+	_channelList.erase(it);
+}

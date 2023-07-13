@@ -27,10 +27,15 @@ class Channel
 		
 		void					addClient(Client* client);
 		void					removeClient(int clientFd);
-		void					broadcast(std::string message, Client* client);
+		void					broadcast(std::string message);
 
 		std::string 			getKey(void);
 		void					setKey(std::string key);
+
+		int						checkClientExistByClientFd(int clientFd);
+		int						isOperator(int clientFd);
+
+		Client*					getClientByNickname(std::string nickName);
 };
 
 #endif

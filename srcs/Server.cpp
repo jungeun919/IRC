@@ -232,3 +232,14 @@ int Server::getFdByNickName(std::string nickName)
 	}
 	return -1;
 }
+
+Channel*	Server::getChannelByChannelName(std::string channelName)
+{	
+	std::map<std::string, Channel*>::iterator it;
+	for (it = _channelList.begin(); it != _channelList.end(); ++it)
+	{
+		if (it->second->getName() == channelName)
+			return it->second;
+	}
+	return NULL;
+}
