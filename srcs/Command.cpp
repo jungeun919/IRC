@@ -49,6 +49,11 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 			throw std::runtime_error("Invalid argument");
 		topic(server, client, token);
 	}
+	else if (token[1] == "MODE") {
+		if (token.size() != 4 && token.size() != 5)
+			throw std::runtime_error("Invalid argument");
+		mode(server, client, token);
+	}
 }
 
 void	Command::pass(Server *server, Client *client, std::string password)
