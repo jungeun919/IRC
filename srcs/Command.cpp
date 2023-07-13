@@ -34,6 +34,13 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 	else if (token[1] == "KICK") {
 		kick(server, client, token);
 	}
+	else if (token[1] == "INVITE") {
+		if (token.size() != 4)
+			throw std::runtime_error("Invalid argument");
+		if (token[3][0] != '#')
+			throw std::runtime_error("Invalid argument");
+		invite(server, client, token[2], token[3].substr(1));
+	}
 }
 
 void	Command::pass(Server *server, Client *client, std::string password)
@@ -178,6 +185,30 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 	if (token.size() == 5)
 		message = client->getNickName() + ": " + token[4].substr(1) + '\n';
 	// broadcast message
+}
+
+void	Command::invite(Server *server, Client *client, std::string nickName, std::string channelName)
+{
+	if (!client->getAuthorized())
+		throw std::runtime_error("Not authorized");
+	
+	// 채널명 있는지 확인
+	Channel *channel = server->getChannelByChannelName(channelName);
+	if (channel == NULL)
+		throw std::runtime_error("Channel doesn't exist");
+	
+	// 입력 유저가 channel에 있는지, operator인지 확인
+	if (channel->checkClientExistByClientFd(client->getFd()) == 0)
+		throw std::runtime_error("User is not in channel");
+	if (channel->isOperator(client->getFd()) == 0)
+		throw std::runtime_error("User is not operator");
+	
+	std::cout << "channel client count: " << channel->getClientList().size() << std::endl;
+	Client* inviteClient = server->getClientByNickname(nickName);
+	if (!inviteClient)
+		return ;
+	channel->addClient(inviteClient);
+	std::cout << "channel client count: " << channel->getClientList().size() << std::endl;
 }
 
 std::vector<std::string>	Command::split(std::string str, std::string delimiter) {

@@ -243,3 +243,14 @@ Channel*	Server::getChannelByChannelName(std::string channelName)
 	}
 	return NULL;
 }
+
+Client*	Server::getClientByNickname(std::string nickName)
+{
+	std::map<int, Client*>::iterator it;
+	for (it = _clientList.begin(); it != _clientList.end(); ++it)
+	{
+		if (it->second->getNickName() == nickName)
+			return it->second;
+	}
+	return NULL;
+}

@@ -58,6 +58,7 @@ class Server
 
 		int				getFdByNickName(std::string nickName);
 		Channel*		getChannelByChannelName(std::string channelName);
+		Client*			getClientByNickname(std::string nickName);
 };
 
 #endif

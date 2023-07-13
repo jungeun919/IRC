@@ -22,6 +22,7 @@ public:
 	static void	join(Server *server, Client *client, std::vector<std::string> token);
 	static void	privmsg(Server *server, Client *client, std::string target, std::string message);
 	static void kick(Server *server, Client *client, std::vector<std::string> token);
+	static void invite(Server *server, Client *client, std::string nickName, std::string channelName);
 
 	static std::vector<std::string>	split(std::string str, std::string delimiter);
 };
