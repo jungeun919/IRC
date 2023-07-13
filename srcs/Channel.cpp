@@ -15,11 +15,26 @@ std::map<int, Client*>&	Channel::getClientList(void)
 	return _clientList;
 }
 
+void	Channel::setTopic(std::string topic)
+{
+	_topic = topic;
+}
+
+void	Channel::clearTopic(void)
+{
+	_topic.clear();
+}
+
 void	Channel::addClient(Client* client)
 {
 	if (_clientList.empty())
 		_operatorList.insert(std::make_pair(client->getFd(), client));
 	_clientList.insert(std::make_pair(client->getFd(), client));
+}
+
+std::string&	Channel::getTopic(void)
+{
+	return _topic;
 }
 
 void	Channel::removeClient(int clientFd)

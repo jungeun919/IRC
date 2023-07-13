@@ -16,6 +16,7 @@ class Channel
 		std::string				_name;
 		std::map<int, Client*>	_operatorList;
 		std::string				_key;
+		std::string				_topic;
 	
 	public:
 		std::map<int, Client*>	_clientList;
@@ -24,6 +25,10 @@ class Channel
 
 		std::string&			getName(void);
 		std::map<int, Client*>&	getClientList(void);
+		std::string&			getTopic(void);
+
+		void					setTopic(std::string topic);
+		void					clearTopic(void);
 		
 		void					addClient(Client* client);
 		void					removeClient(int clientFd);

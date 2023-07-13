@@ -41,6 +41,14 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 			throw std::runtime_error("Invalid argument");
 		invite(server, client, token[2], token[3].substr(1));
 	}
+	else if (token[1] == "TOPIC") {
+		// TOPIC channel topic
+		if (token.size() != 3 && token.size() != 4)
+			throw std::runtime_error("Invalid argument");
+		if (token[2][0] != '#')
+			throw std::runtime_error("Invalid argument");
+		topic(server, client, token);
+	}
 }
 
 void	Command::pass(Server *server, Client *client, std::string password)
@@ -209,6 +217,34 @@ void	Command::invite(Server *server, Client *client, std::string nickName, std::
 		return ;
 	channel->addClient(inviteClient);
 	std::cout << "channel client count: " << channel->getClientList().size() << std::endl;
+}
+
+void	Command::topic(Server *server, Client *client, std::vector<std::string> token)
+{
+	if (!client->getAuthorized())
+		throw std::runtime_error("Not authorized");
+	
+	// 채널명 있는지 확인
+	Channel *channel = server->getChannelByChannelName(token[2].substr(1));
+	if (channel == NULL)
+		throw std::runtime_error("Channel doesn't exist");
+	
+	// 입력 유저가 channel에 있는지 확인
+	if (channel->checkClientExistByClientFd(client->getFd()) == 0)
+		throw std::runtime_error("User is not in channel");
+	
+	if (token.size() == 3)
+		std::cout << channel->getTopic() << std::endl;
+	else
+	{
+		if (token[3][0] != ':')
+			throw std::runtime_error("Invalid argument");
+		std::string topic = token[3].substr(1);
+		if (topic.empty())
+			channel->clearTopic();
+		else
+			channel->setTopic(topic);
+	}
 }
 
 std::vector<std::string>	Command::split(std::string str, std::string delimiter) {
