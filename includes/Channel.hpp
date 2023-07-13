@@ -15,11 +15,11 @@ class Channel
 {
 	private:
 		std::string				_name;
-		std::map<int, Client*>	_operatorList;
 		std::string				_key;
 		std::string				_topic;
 	
 	public:
+		std::map<int, Client*>	_operatorList;
 		std::map<int, Client*>	_clientList;
 		
 		Channel(std::string name);

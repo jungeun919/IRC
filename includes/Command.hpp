@@ -24,6 +24,7 @@ public:
 	static void kick(Server *server, Client *client, std::vector<std::string> token);
 	static void invite(Server *server, Client *client, std::string nickName, std::string channelName);
 	static void topic(Server *server, Client *client, std::vector<std::string> token);
+	static void mode(Server *server, Client *client, std::vector<std::string> token);
 
 	static std::vector<std::string>	split(std::string str, std::string delimiter);
 };

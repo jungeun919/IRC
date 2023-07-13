@@ -247,6 +247,63 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 	}
 }
 
+void Command::mode(Server *server, Client *client, std::vector<std::string> token)
+{
+	if (token[2][0] != '#')
+		throw std::runtime_error("Invalid argument");
+	if (token[3][0] != '+' && token[3][0] != '-')
+		throw std::runtime_error("Invalid argument");
+	if (token[3][1] != 'i' && token[3][1] != 't' && token[3][1] != 'k' && token[3][1] != 'o' && token[3][1] != 'l')
+		throw std::runtime_error("Invalid argument");
+	if (token[3].length() != 2)
+		throw std::runtime_error("Invalid argument");
+	
+	if (!client->getAuthorized())
+		throw std::runtime_error("Not authorized");
+	
+	// 채널명 있는지 확인
+	Channel *channel = server->_channelList[token[2].substr(1)];
+	if (channel == NULL)
+		throw std::runtime_error("Channel doesn't exist");
+	
+	// 입력 유저가 channel에 있는지, operator인지 확인
+	if (channel->isOperator(client->getFd()) == 0)
+		throw std::runtime_error("User is not operator");
+	if (token[3][1] == 'o' || token[3][1] == 'l')
+		if (channel->getClientByNickname(token[4]) == NULL)
+			throw std::runtime_error("User is not in channel");
+	
+
+	if (token[3][1] == 'i')
+	{
+	}
+	else if (token[3][1 == 't'])
+	{
+	}
+	if (token[3][1] == 'k')
+	{
+		if (token[3][0] == '+')
+			channel->setKey(token[4]);
+		else
+		{
+			if (token.size() != 4)
+				throw std::runtime_error("Invalid argument");
+			channel->setKey("");
+		}
+	}
+	else if (token[3][1] == 'o')
+	{
+		Client *opClient = channel->getClientByNickname(token[4]);
+		if (token[3][0] == '+')
+			channel->_operatorList[opClient->getFd()] = opClient;
+		else
+			channel->_operatorList.erase(opClient->getFd());
+	}
+	else if (token[3][1] == 'l')
+	{
+	}
+}
+
 std::vector<std::string>	Command::split(std::string str, std::string delimiter) {
 	std::vector<std::string> ret;
 
