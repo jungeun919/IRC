@@ -7,6 +7,7 @@
 
 # include <iostream>
 # include <map>
+# include <sys/socket.h>
 
 class Client;
 

@@ -191,8 +191,8 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 
 	std::string message = "There is no reason";
 	if (token.size() == 5)
-		message = client->getNickName() + ": " + token[4].substr(1) + '\n';
-	// broadcast message
+		message = client->getNickName() + ": " + token[4].substr(1) + '\n';	
+	channel->broadcast(message);
 }
 
 void	Command::invite(Server *server, Client *client, std::string nickName, std::string channelName)
