@@ -105,16 +105,30 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 	if (!server->checkChannelName(channelName))
 	{
 		server->addChannel(channelName);
-		server->_channelList[channelName]->addClient(client);
-		client->addChannel(channelName, server->_channelList[channelName]);
-		server->_channelList[channelName]->setKey(key);
+		Channel *channel = server->getChannelByChannelName(channelName);
+		channel->setKey(key);
+		if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
+		{
+			channel->addClient(client);
+			client->addChannel(channelName, channel);
+		}
+		else
+			throw std::runtime_error("Exceed user limit");
 	}
 	else
 	{
-		if (server->_channelList[channelName]->getKey() == key)
+		Channel *channel = server->getChannelByChannelName(channelName);
+		if (channel == NULL)
+			throw std::runtime_error("Channel doesn't exist");
+		if (channel->getKey() == key)
 		{
-			server->_channelList[channelName]->addClient(client);
-			client->addChannel(channelName, server->_channelList[channelName]);
+			if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
+			{
+				channel->addClient(client);
+				client->addChannel(channelName, channel);
+			}
+			else
+				throw std::runtime_error("Exceed user limit");
 		}
 		else
 			throw std::runtime_error("Wrong key");
@@ -234,9 +248,13 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 	if (channel == NULL)
 		throw std::runtime_error("Channel doesn't exist");
 	
-	// 입력 유저가 channel에 있는지 확인
+	// 입력 유저가 channel에 있는지, operator인지, channel mode에 't' 있는지 확인
 	if (channel->checkClientExistByClientFd(client->getFd()) == 0)
 		throw std::runtime_error("User is not in channel");
+	if (channel->isOperator(client->getFd()) == 0)
+		throw std::runtime_error("User is not operator");
+	if (channel->getMode().find('t') == std::string::npos)
+		throw std::runtime_error("Channel doesn't have permission to set topic");
 	
 	if (token.size() == 3)
 		std::cout << channel->getTopic() << std::endl;
@@ -274,16 +292,25 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 	// 입력 유저가 channel에 있는지, operator인지 확인
 	if (channel->isOperator(client->getFd()) == 0)
 		throw std::runtime_error("User is not operator");
-	if (token[3][1] == 'o' || token[3][1] == 'l')
+	if (token[3][1] == 'o')
 		if (channel->getClientByNickname(token[4]) == NULL)
 			throw std::runtime_error("User is not in channel");
 	
 
 	if (token[3][1] == 'i')
 	{
+		// invite 동작 추가하기
+		// if (token[3][0] == '+')
+		// 	channel->setMode('i');
+		// else
+		// 	channel->removeMode('i');
 	}
-	else if (token[3][1 == 't'])
+	else if (token[3][1] == 't')
 	{
+		if (token[3][0] == '+')
+			channel->setMode('t');
+		else
+			channel->removeMode('t');
 	}
 	if (token[3][1] == 'k')
 	{
@@ -304,8 +331,24 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 		else
 			channel->_operatorList.erase(opClient->getFd());
 	}
+	// (1/0) MODE #channel +l/-l (10)
 	else if (token[3][1] == 'l')
 	{
+		if (token[3][0] == '+')
+		{
+			channel->setMode('l');
+			int limit = atoi(token[4].c_str());
+			if (limit < 0)
+				return;
+			channel->setLimit(limit);
+		}
+		else
+		{
+			if (token.size() != 4)
+				throw std::runtime_error("Invalid argument");
+			channel->removeMode('l');
+			channel->setLimit(-1);
+		}
 	}
 }
 

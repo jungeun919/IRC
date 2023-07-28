@@ -3,6 +3,8 @@
 Channel::Channel(std::string name)
 {
 	_name = name;
+	_mode = "t";
+	_limit = -1;
 }
 
 std::string&	Channel::getName(void)
@@ -60,6 +62,34 @@ std::string Channel::getKey(void)
 void	Channel::setKey(std::string key)
 {
 	_key = key;
+}
+
+std::string	Channel::getMode(void)
+{
+	return _mode;
+}
+
+void	Channel::setMode(char mode)
+{
+	if (_mode.find(mode) == std::string::npos)
+		_mode += mode;
+}
+
+void	Channel::removeMode(char mode)
+{
+	size_t pos = _mode.find(mode);
+	if (pos != std::string::npos)
+		_mode.erase(pos, 1);
+}
+
+int Channel::getLimit(void)
+{
+	return _limit;
+}
+
+void	Channel::setLimit(int limit)
+{
+	_limit = limit;
 }
 
 int	Channel::checkClientExistByClientFd(int clientFd)

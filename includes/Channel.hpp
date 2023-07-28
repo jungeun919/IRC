@@ -17,6 +17,8 @@ class Channel
 		std::string				_name;
 		std::string				_key;
 		std::string				_topic;
+		std::string				_mode;
+		int						_limit;
 	
 	public:
 		std::map<int, Client*>	_operatorList;
@@ -37,6 +39,13 @@ class Channel
 
 		std::string 			getKey(void);
 		void					setKey(std::string key);
+
+		std::string 			getMode(void);
+		void					setMode(char mode);
+		void					removeMode(char mode);
+
+		int 					getLimit(void);
+		void					setLimit(int limit);
 
 		int						checkClientExistByClientFd(int clientFd);
 		int						isOperator(int clientFd);
