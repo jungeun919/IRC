@@ -12,11 +12,6 @@ std::string&	Channel::getName(void)
 	return _name;
 }
 
-std::map<int, Client*>&	Channel::getClientList(void)
-{
-	return _clientList;
-}
-
 void	Channel::setTopic(std::string topic)
 {
 	_topic = topic;
@@ -90,6 +85,26 @@ int Channel::getLimit(void)
 void	Channel::setLimit(int limit)
 {
 	_limit = limit;
+}
+
+std::map<int, Client*>	Channel::getOperatorList(void)
+{
+	return _operatorList;
+}
+
+std::map<int, Client*>	Channel::getClientList(void)
+{
+	return _clientList;
+}
+
+void	Channel::setOperator(Client* client)
+{
+	_operatorList[client->getFd()] = client;
+}
+
+void	Channel::removeOperator(Client* client)
+{
+	_operatorList.erase(client->getFd());
 }
 
 int	Channel::checkClientExistByClientFd(int clientFd)

@@ -146,7 +146,7 @@ void	Command::privmsg(Server *server, Client *client, std::string target, std::s
 		if (!server->checkChannelName(target))
 			throw std::runtime_error("Channel doesn't exist");
 		
-		std::map<int, Client*> clientList = server->getChannelByChannelName(target)->_clientList;
+		std::map<int, Client*> clientList = server->getChannelByChannelName(target)->getClientList();
 		std::map<int, Client*>::iterator it = clientList.begin();
 		while (it != clientList.end())
 		{
@@ -327,9 +327,9 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 	{
 		Client *opClient = channel->getClientByNickname(token[4]);
 		if (token[3][0] == '+')
-			channel->_operatorList[opClient->getFd()] = opClient;
+			channel->setOperator(opClient);
 		else
-			channel->_operatorList.erase(opClient->getFd());
+			channel->removeOperator(opClient);
 	}
 	// (1/0) MODE #channel +l/-l (10)
 	else if (token[3][1] == 'l')

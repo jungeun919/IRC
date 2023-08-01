@@ -23,9 +23,9 @@ class Client
 		std::string _realName;
 		std::string _nickName;
 	
-	public:
 		std::map<std::string, Channel*> _channelList;
-
+	
+	public:
 		Client(int fd);
 		~Client(void);
 
