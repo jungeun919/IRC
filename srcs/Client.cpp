@@ -6,6 +6,11 @@ Client::Client(int fd)
 	_authorized = 0;
 }
 
+Client::~Client(void)
+{
+	close(_fd);
+}
+
 int	Client::getFd(void)
 {
 	return _fd;

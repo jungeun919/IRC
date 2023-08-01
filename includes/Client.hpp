@@ -7,6 +7,7 @@
 
 # include <map>
 # include <iostream>
+# include <unistd.h>
 
 class Channel;
 
@@ -21,10 +22,12 @@ class Client
 		std::string _userName;
 		std::string _realName;
 		std::string _nickName;
+	
 	public:
 		std::map<std::string, Channel*> _channelList;
 
 		Client(int fd);
+		~Client(void);
 
 		int				getFd(void);
 		

@@ -40,6 +40,7 @@ class Server
 	
 	public:
 		Server(char *port, char *password);
+		~Server(void);
 
 		void	initKqueue(void);
 		void	addEvents(int socket, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata);

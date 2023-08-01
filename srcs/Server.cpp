@@ -29,6 +29,17 @@ Server::Server(char *port, char *password)
 		throw std::runtime_error("Failed to listen");
 }
 
+Server::~Server(void)
+{
+	close(_socket);
+	close(_kqueue);
+	
+	for (std::map<int, Client*>::iterator it = _clientList.begin(); it != _clientList.end(); ++it)
+		delete it->second;
+	for (std::map<std::string, Channel*>::iterator it = _channelList.begin(); it != _channelList.end(); ++it)
+		delete it->second;
+}
+
 void	Server::initKqueue(void)
 {
 	if ((_kqueue = kqueue()) == -1)
