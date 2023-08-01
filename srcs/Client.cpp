@@ -76,7 +76,7 @@ void Client::setNickName(std::string nickName)
 	_nickName = nickName;
 }
 
-std::map<std::string, Channel*>& Client::getChannelList(void)
+std::map<std::string, Channel*>	Client::getChannelList(void)
 {
 	return _channelList;
 }

@@ -99,6 +99,8 @@ void	Server::handleEvent(struct kevent &event)
 			disconnectClient(event.ident);
 		}
 	}
+	else if (event.flags & EV_EOF)
+		disconnectClient(event.ident);
 	else if (event.filter == EVFILT_READ)
 	{
 		if (event.ident == (uintptr_t)_socket)
@@ -166,7 +168,20 @@ void	Server::disconnectClient(uintptr_t clientFd)
 	if (it == _clientList.end())
 		return ;
 	_clientList.erase(clientFd);
-	delete it->second;
+	
+	Client* client = it->second;
+	std::map<std::string, Channel*> joinedChannelList = client->getChannelList();
+	std::map<std::string, Channel*>::iterator it2;
+	for (it2 = joinedChannelList.begin(); it2 != joinedChannelList.end(); ++it2)
+	{
+		Channel* joinedChannel = it2->second;
+		joinedChannel->removeClient(client->getFd());
+		if (joinedChannel->getClientList().size() == 0)
+			deleteChannelByChannelName(it2->first);
+	}
+	client->getChannelList().clear();
+
+	delete client;
 }
 
 std::string Server::getPassword(void)
@@ -269,4 +284,13 @@ Client*	Server::getClientByNickname(std::string nickName)
 			return it->second;
 	}
 	return NULL;
+}
+
+void	Server::deleteChannelByChannelName(std::string channelName)
+{
+	std::map<std::string, Channel*>::iterator it = _channelList.find(channelName);
+	if (it == _channelList.end())
+		return ;
+	_channelList.erase(it);
+	delete it->second;
 }

@@ -49,7 +49,7 @@ class Client
 		std::string&	getNickName(void);
 		void			setNickName(std::string nickName);
 
-		std::map<std::string, Channel*>&	getChannelList(void);
+		std::map<std::string, Channel*>	getChannelList(void);
 		void			addChannel(std::string channelName, Channel* channel);
 		void			removeChannel(std::string channelName);
 };
