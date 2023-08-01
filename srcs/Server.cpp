@@ -216,6 +216,11 @@ std::map<int, Client*> Server::getClientList(void)
 	return _clientList;
 }
 
+std::map<std::string, Channel*>	Server::getChannelList(void)
+{
+	return _channelList;
+}
+
 void Server::addChannel(std::string channelName)
 {
 	_channelList.insert(std::make_pair(channelName, new Channel(channelName)));

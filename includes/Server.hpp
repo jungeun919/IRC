@@ -36,9 +36,9 @@ class Server
 		struct kevent				_eventList[MAX_EVENTS];
 
 		std::map<int, Client*>		_clientList;
-	public:
 		std::map<std::string, Channel*>	_channelList;
-		
+	
+	public:
 		Server(char *port, char *password);
 
 		void	initKqueue(void);
@@ -53,8 +53,10 @@ class Server
 		int 			checkNickName(std::string nickName);
 		int 			checkChannelName(std::string channelName);
 
-		std::map<int, Client*>		getClientList(void);
+		std::map<int, Client*>			getClientList(void);
+		std::map<std::string, Channel*>	getChannelList(void);
 		void			addChannel(std::string channelName);
+		
 
 		int				getFdByNickName(std::string nickName);
 		Channel*		getChannelByChannelName(std::string channelName);

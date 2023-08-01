@@ -146,7 +146,7 @@ void	Command::privmsg(Server *server, Client *client, std::string target, std::s
 		if (!server->checkChannelName(target))
 			throw std::runtime_error("Channel doesn't exist");
 		
-		std::map<int, Client*> clientList = server->_channelList[target]->_clientList;
+		std::map<int, Client*> clientList = server->getChannelByChannelName(target)->_clientList;
 		std::map<int, Client*>::iterator it = clientList.begin();
 		while (it != clientList.end())
 		{
@@ -285,7 +285,7 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 		throw std::runtime_error("Not authorized");
 	
 	// 채널명 있는지 확인
-	Channel *channel = server->_channelList[token[2].substr(1)];
+	Channel *channel = server->getChannelByChannelName(token[2].substr(1));
 	if (channel == NULL)
 		throw std::runtime_error("Channel doesn't exist");
 	
