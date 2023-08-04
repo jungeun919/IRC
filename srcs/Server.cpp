@@ -76,11 +76,9 @@ void	Server::run(void)
 			}
 			catch (std::exception &e)
 			{
-				std::cout << e.what() << std::endl;
+				std::cout << "Client" << _eventList[i].ident << " " << e.what() << std::endl;
 				std::string msg = e.what();
-				msg = "[Server] " + msg + "\n";
-				if (send(_eventList[i].ident, msg.c_str(), msg.length(), 0) == -1)
-					throw std::runtime_error("Failed to send");
+				sendToClient(_eventList[i].ident, msg);
 			}
 		}
 	}
@@ -119,6 +117,8 @@ void	Server::handleEvent(struct kevent &event)
 			// client 동작 추가 (ok)
 			Client* client = new Client(client_socket);
 			_clientList.insert(std::make_pair(client_socket, client));
+			std::cout << "Client" << client_socket << " connected" << std::endl;
+			sendToClient(client_socket, "Enter Password  ex)PASS <password>");
 		}
 		else
 		{
@@ -293,4 +293,13 @@ void	Server::deleteChannelByChannelName(std::string channelName)
 		return ;
 	_channelList.erase(it);
 	delete it->second;
+}
+
+void	Server::sendToClient(int fd, std::string message)
+{
+	std::map<int, Client*>::iterator it = _clientList.find(fd);
+	if (it == _clientList.end())
+		return ;
+	message = "[Server] " + message + "\n";
+	send(fd, message.c_str(), message.length(), 0);
 }

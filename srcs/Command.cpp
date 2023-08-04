@@ -61,7 +61,11 @@ void	Command::pass(Server *server, Client *client, std::string password)
 	if (client->getAuthorized() >= 1)
 		throw std::runtime_error("Already authorized");
 	if (server->getPassword() == password)
+	{
 		client->setAuthorized(1);
+		server->sendToClient(client->getFd(), "Enter NickName  ex)NICK <nickname>");
+		std::cout << "Client" << client->getFd() << " Login Success" << std::endl;
+	}
 	else
 		throw std::runtime_error("Wrong password");
 }
@@ -75,6 +79,8 @@ void	Command::nick(Server *server, Client *client, std::string nickName)
 		throw std::runtime_error("NickName already exist");
 	
 	client->setNickName(nickName);
+	std::cout << "Client" << client->getFd() << " NickName is " << nickName << std::endl;
+	server->sendToClient(client->getFd(), "Enter UserName  ex)USER <username> 0 * :<realname>");
 }
 
 void	Command::user(Server *server, Client *client, std::string userName, std::string realName)
@@ -89,6 +95,9 @@ void	Command::user(Server *server, Client *client, std::string userName, std::st
 		throw std::runtime_error("RealName already exist");
 	client->setUserName(userName);
 	client->setRealName(realName);
+	std::cout << "Client" << client->getFd() << " UserName is " << userName << std::endl;
+	std::cout << "Client" << client->getFd() << " RealName is " << realName << std::endl;
+	server->sendToClient(client->getFd(), "Welcome to the Internet Relay Network " + client->getNickName() + "!" + client->getUserName() + "@irc.42.fr");
 }
 
 void	Command::join(Server *server, Client *client, std::vector<std::string> token)

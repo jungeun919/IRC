@@ -64,6 +64,8 @@ class Server
 		Client*			getClientByNickname(std::string nickName);
 
 		void			deleteChannelByChannelName(std::string channelName);
+
+		void		sendToClient(int fd, std::string msg);
 };
 
 #endif
