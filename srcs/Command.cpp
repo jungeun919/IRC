@@ -27,9 +27,9 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 		join(server, client, token);
 	}
 	else if (token[1] == "PRIVMSG") {
-		if (token.size() != 4)
+		if (token.size() < 4)
 			throw std::runtime_error("Invalid argument");
-		privmsg(server, client, token[2], token[3]);
+		privmsg(server, client, token);
 	}
 	else if (token[1] == "KICK") {
 		kick(server, client, token);
@@ -153,11 +153,25 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 	}
 }
 
-void	Command::privmsg(Server *server, Client *client, std::string target, std::string message)
+void	Command::privmsg(Server *server, Client *client, std::vector<std::string> token)
 {
 	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
-	message = client->getNickName() + ": " + message + "\n";
+	std::string message = client->getNickName() + ": ";
+
+	if (token[3][0] != ':')
+		throw std::runtime_error("Invalid argument");
+	token[3] = token[3].substr(1);
+	
+	int i = 3;
+	while (token[i] != "")
+	{
+		message += token[i];
+		message += " ";
+		i++;
+	}
+	message += "\n";
+	std::string target = token[2];
 	if (target[0] == '#')
 	{
 		target = target.substr(1);

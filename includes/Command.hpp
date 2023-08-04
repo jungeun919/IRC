@@ -20,7 +20,7 @@ public:
 	static void	nick(Server *server, Client *client, std::string nickName);
 	static void	user(Server *server, Client *client, std::string userName, std::string realName);
 	static void	join(Server *server, Client *client, std::vector<std::string> token);
-	static void	privmsg(Server *server, Client *client, std::string target, std::string message);
+	static void	privmsg(Server *server, Client *client, std::vector<std::string> token);
 	static void kick(Server *server, Client *client, std::vector<std::string> token);
 	static void invite(Server *server, Client *client, std::string nickName, std::string channelName);
 	static void topic(Server *server, Client *client, std::vector<std::string> token);
