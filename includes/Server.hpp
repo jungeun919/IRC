@@ -65,7 +65,7 @@ class Server
 
 		void			deleteChannelByChannelName(std::string channelName);
 
-		void		sendToClient(int fd, std::string msg);
+		void			sendToClient(int fd, std::string msg);
 };
 
 #endif

@@ -75,9 +75,13 @@ void	Command::nick(Server *server, Client *client, std::string nickName)
 	if (!client->getAuthorized())
 		throw std::runtime_error("Not authorized");
 	
+	if (client->getAuthorized() >= 2)
+		throw std::runtime_error("Already set NickName");
+	
 	if (server->checkNickName(nickName))
 		throw std::runtime_error("NickName already exist");
 	
+	client->setAuthorized(2);
 	client->setNickName(nickName);
 	std::cout << "Client" << client->getFd() << " NickName is " << nickName << std::endl;
 	server->sendToClient(client->getFd(), "Enter UserName  ex)USER <username> 0 * :<realname>");
@@ -85,14 +89,19 @@ void	Command::nick(Server *server, Client *client, std::string nickName)
 
 void	Command::user(Server *server, Client *client, std::string userName, std::string realName)
 {
-	if (!client->getAuthorized())
+	if (client->getAuthorized() < 2)
 		throw std::runtime_error("Not authorized");
 	
+	if (client->getAuthorized() >= 3)
+		throw std::runtime_error("Already set UserName and RealName");
+
 	if (server->checkUserName(userName))
 		throw std::runtime_error("UserName already exist");
 
 	if (server->checkRealName(realName))
 		throw std::runtime_error("RealName already exist");
+
+	client->setAuthorized(3);
 	client->setUserName(userName);
 	client->setRealName(realName);
 	std::cout << "Client" << client->getFd() << " UserName is " << userName << std::endl;
@@ -102,7 +111,7 @@ void	Command::user(Server *server, Client *client, std::string userName, std::st
 
 void	Command::join(Server *server, Client *client, std::vector<std::string> token)
 {
-	if (!client->getAuthorized())
+	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
 	std::string channelName = token[2].substr(1);
@@ -146,7 +155,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 
 void	Command::privmsg(Server *server, Client *client, std::string target, std::string message)
 {
-	if (!client->getAuthorized())
+	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	message = client->getNickName() + ": " + message + "\n";
 	if (target[0] == '#')
@@ -185,7 +194,7 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 			throw std::runtime_error("Invalid argument");
 	}
 	
-	if (!client->getAuthorized())
+	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
 	// 채널명 있는지 확인
@@ -225,7 +234,7 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 
 void	Command::invite(Server *server, Client *client, std::string nickName, std::string channelName)
 {
-	if (!client->getAuthorized())
+	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
 	// 채널명 있는지 확인
@@ -249,7 +258,7 @@ void	Command::invite(Server *server, Client *client, std::string nickName, std::
 
 void	Command::topic(Server *server, Client *client, std::vector<std::string> token)
 {
-	if (!client->getAuthorized())
+	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
 	// 채널명 있는지 확인
@@ -290,7 +299,7 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 	if (token[3].length() != 2)
 		throw std::runtime_error("Invalid argument");
 	
-	if (!client->getAuthorized())
+	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
 	// 채널명 있는지 확인
