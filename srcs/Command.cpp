@@ -180,8 +180,11 @@ void	Command::privmsg(Server *server, Client *client, std::vector<std::string> t
 	if (target[0] == '#')
 	{
 		target = target.substr(1);
-		if (!server->checkChannelName(target))
+		Channel *channel = server->getChannelByChannelName(target);
+		if (channel == NULL)
 			throw std::runtime_error("Channel doesn't exist");
+		if (channel->checkClientExistByClientFd(client->getFd()) == 0)
+			throw std::runtime_error("User is not in channel");
 		
 		std::map<int, Client*> clientList = server->getChannelByChannelName(target)->getClientList();
 		std::map<int, Client*>::iterator it = clientList.begin();
@@ -245,7 +248,7 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 		std::cout << "kick " << kickClient->getFd() << " from " << token[2] << std::endl;
 	}
 
-	std::string message = "There is no reason";
+	std::string message = "There is no reason\n";
 	if (token.size() == 5)
 		message = client->getNickName() + ": " + token[4].substr(1) + '\n';	
 	channel->broadcast(message);
@@ -288,13 +291,18 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 	// 입력 유저가 channel에 있는지, operator인지, channel mode에 't' 있는지 확인
 	if (channel->checkClientExistByClientFd(client->getFd()) == 0)
 		throw std::runtime_error("User is not in channel");
-	if (channel->isOperator(client->getFd()) == 0)
-		throw std::runtime_error("User is not operator");
-	if (channel->getMode().find('t') == std::string::npos)
-		throw std::runtime_error("Channel doesn't have permission to set topic");
-	
+	if (channel->getMode().find('t') != std::string::npos)
+	{
+		if (channel->isOperator(client->getFd()) == 0)
+			throw std::runtime_error("User is not operator");
+	}
+
 	if (token.size() == 3)
-		std::cout << channel->getTopic() << std::endl;
+	{
+		std::string message = channel->getTopic() + "\n";
+		if (!send(client->getFd(), message.c_str(), message.length(), 0))
+			throw std::runtime_error("User not connected");
+	}
 	else
 	{
 		if (token[3][0] != ':')
