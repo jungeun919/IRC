@@ -138,6 +138,9 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 		Channel *channel = server->getChannelByChannelName(channelName);
 		if (channel == NULL)
 			throw std::runtime_error("Channel doesn't exist");
+		if (channel->getMode().find('i') != std::string::npos)
+			throw std::runtime_error("Channel is set to INVITE-ONLY mode");
+		
 		if (channel->getKey() == key)
 		{
 			if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
@@ -331,11 +334,10 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 
 	if (token[3][1] == 'i')
 	{
-		// invite 동작 추가하기
-		// if (token[3][0] == '+')
-		// 	channel->setMode('i');
-		// else
-		// 	channel->removeMode('i');
+		if (token[3][0] == '+')
+			channel->setMode('i');
+		else
+			channel->removeMode('i');
 	}
 	else if (token[3][1] == 't')
 	{
@@ -363,7 +365,6 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 		else
 			channel->removeOperator(opClient);
 	}
-	// (1/0) MODE #channel +l/-l (10)
 	else if (token[3][1] == 'l')
 	{
 		if (token[3][0] == '+')
