@@ -143,6 +143,8 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 		
 		if (channel->getKey() == key)
 		{
+			if (channel->checkClientExistByClientFd(client->getFd()))
+				throw std::runtime_error("Already joined channel");
 			if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
 			{
 				channel->addClient(client);
