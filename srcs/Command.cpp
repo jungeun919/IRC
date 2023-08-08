@@ -129,6 +129,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 		{
 			channel->addClient(client);
 			client->addChannel(channelName, channel);
+			server->sendToClient(client->getFd(), "Channel #" + channelName + " created");
 		}
 		else
 			throw std::runtime_error("Exceed user limit");
@@ -147,8 +148,13 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 				throw std::runtime_error("Already joined channel");
 			if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
 			{
+				std::map<int, Client*> clientList = channel->getClientList();
+				for (std::map<int, Client*>::iterator it = clientList.begin(); it != clientList.end(); it++)
+					server->sendToClient(it->first, client->getNickName() + " has joined channel #" + channelName);
+
 				channel->addClient(client);
 				client->addChannel(channelName, channel);
+				server->sendToClient(client->getFd(), "Channel #" + channelName + " joined");
 			}
 			else
 				throw std::runtime_error("Exceed user limit");

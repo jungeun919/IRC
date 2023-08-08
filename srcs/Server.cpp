@@ -143,7 +143,7 @@ void	Server::handleEvent(struct kevent &event)
 			if (token[0] == "1")
 				Command::runCommand(token, this, it->second);
 			else
-				std::cout << "not command" << std::endl;
+				throw std::runtime_error("not command");
 			}
 		}
 
