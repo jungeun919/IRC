@@ -43,7 +43,7 @@ void	Command::runCommand(std::vector<std::string> token, Server *server, Client 
 	}
 	else if (token[1] == "TOPIC") {
 		// TOPIC channel topic
-		if (token.size() != 3 && token.size() != 4)
+		if (token.size() < 3)
 			throw std::runtime_error("Invalid argument");
 		if (token[2][0] != '#')
 			throw std::runtime_error("Invalid argument");
@@ -203,8 +203,8 @@ void	Command::privmsg(Server *server, Client *client, std::vector<std::string> t
 	}
 	else
 	{
-		if (!server->checkNickName(target))
-			throw std::runtime_error("NickName doesn't exist");
+		if (!server->checkNickName(target) || server->getClientByNickname(target)->getAuthorized() < 3)
+			throw std::runtime_error("User doesn't exist");
 		if (!send(server->getFdByNickName(target), message.c_str(), message.length(), 0))
 			throw std::runtime_error("User not connected");
 	}
@@ -248,6 +248,8 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 	{
 		Client* kickClient = channel->getClientByNickname(*it);
 		if (!kickClient)
+			continue ;
+		if (kickClient == client)
 			continue ;
 		channel->removeClient(kickClient->getFd());
 		kickClient->removeChannel(token[2].substr(1));
@@ -313,7 +315,17 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 	{
 		if (token[3][0] != ':')
 			throw std::runtime_error("Invalid argument");
-		std::string topic = token[3].substr(1);
+		std::string topic = "";
+		token[3] = token[3].substr(1);
+	
+		int i = 3;
+		while (token[i] != "")
+		{
+			topic += token[i];
+			topic += " ";
+			i++;
+		}
+		
 		if (topic.empty())
 			channel->clearTopic();
 		else
