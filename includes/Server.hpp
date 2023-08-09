@@ -3,7 +3,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# define MAX_EVENTS 10
+# define MAX_EVENTS 1000
 # define BUFFER_SIZE 1024
 
 # include "Parsing.hpp"

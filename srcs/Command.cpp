@@ -114,53 +114,67 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
-	std::string channelName = token[2].substr(1);
-	std::string key = "";
+	std::vector<std::string> channelName = split(token[2], ",");
+	std::vector<std::string> key = split(token[3], ",");
 
-	if (token.size() == 4)
-		key = token[3];
-	
-	if (!server->checkChannelName(channelName))
+	//if (token.size() == 4)
+	//	key = token[3];
+
+	while (channelName.size() > key.size())
+		key.push_back("");
+
+	for (size_t i = 0; i < channelName.size(); i++)
 	{
-		server->addChannel(channelName);
-		Channel *channel = server->getChannelByChannelName(channelName);
-		channel->setKey(key);
-		if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
-		{
-			channel->addClient(client);
-			client->addChannel(channelName, channel);
-			server->sendToClient(client->getFd(), "Channel #" + channelName + " created");
-		}
-		else
-			throw std::runtime_error("Exceed user limit");
-	}
-	else
-	{
-		Channel *channel = server->getChannelByChannelName(channelName);
-		if (channel == NULL)
-			throw std::runtime_error("Channel doesn't exist");
-		if (channel->getMode().find('i') != std::string::npos)
-			throw std::runtime_error("Channel is set to INVITE-ONLY mode");
-		
-		if (channel->getKey() == key)
-		{
-			if (channel->checkClientExistByClientFd(client->getFd()))
-				throw std::runtime_error("Already joined channel");
-			if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
+		try {
+			channelName[i] = channelName[i].substr(1);
+			if (!server->checkChannelName(channelName[i]))
 			{
-				std::map<int, Client*> clientList = channel->getClientList();
-				for (std::map<int, Client*>::iterator it = clientList.begin(); it != clientList.end(); it++)
-					server->sendToClient(it->first, client->getNickName() + " has joined channel #" + channelName);
-
-				channel->addClient(client);
-				client->addChannel(channelName, channel);
-				server->sendToClient(client->getFd(), "Channel #" + channelName + " joined");
+				server->addChannel(channelName[i]);
+				Channel *channel = server->getChannelByChannelName(channelName[i]);
+				channel->setKey(key[i]);
+				if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
+				{
+					channel->addClient(client);
+					client->addChannel(channelName[i], channel);
+					server->sendToClient(client->getFd(), "Channel " + channelName[i] + " created");
+				}
+				else
+					throw std::runtime_error("Exceed user limit");
 			}
 			else
-				throw std::runtime_error("Exceed user limit");
+			{
+				Channel *channel = server->getChannelByChannelName(channelName[i]);
+				if (channel == NULL)
+					throw std::runtime_error("Channel doesn't exist");
+				if (channel->getMode().find('i') != std::string::npos)
+					throw std::runtime_error("Channel is set to INVITE-ONLY mode");
+				
+				if (channel->getKey() == key[i])
+				{
+					if (channel->checkClientExistByClientFd(client->getFd()))
+						throw std::runtime_error("Already joined channel");
+					if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
+					{
+						std::map<int, Client*> clientList = channel->getClientList();
+						for (std::map<int, Client*>::iterator it = clientList.begin(); it != clientList.end(); it++)
+							server->sendToClient(it->first, client->getNickName() + " has joined Channel #" + channelName[i]);
+
+						channel->addClient(client);
+						client->addChannel(channelName[i], channel);
+						server->sendToClient(client->getFd(), "Channel #" + channelName[i] + " joined");
+					}
+					else
+						throw std::runtime_error("Exceed user limit");
+				}
+				else
+					throw std::runtime_error("Wrong key");
+			}
 		}
-		else
-			throw std::runtime_error("Wrong key");
+		catch (std::exception &e) {
+			std::string msg = "Channel #" + channelName[i] + " " + e.what();
+			std::cout << "Client" << client->getFd() << " " << msg << std::endl;
+			server->sendToClient(client->getFd(), msg);
+		}
 	}
 }
 
@@ -278,7 +292,7 @@ void	Command::invite(Server *server, Client *client, std::string nickName, std::
 	if (channel->isOperator(client->getFd()) == 0)
 		throw std::runtime_error("User is not operator");
 	
-	std::cout << "channel client count: " << channel->getClientList().size() << std::endl;
+	std::cout << "channel #" << channelName << " client count: " << channel->getClientList().size() << std::endl;
 	Client* inviteClient = server->getClientByNickname(nickName);
 	if (!inviteClient)
 		return ;
@@ -325,7 +339,7 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 			topic += " ";
 			i++;
 		}
-		
+
 		if (topic.empty())
 			channel->clearTopic();
 		else

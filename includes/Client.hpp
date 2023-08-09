@@ -15,9 +15,6 @@ class Client
 {
 	private:
 		int			_fd;
-		std::string	_readBuff;
-		std::string	_writeBuff;
-
 		int 		_authorized;
 		std::string _userName;
 		std::string _realName;
@@ -30,12 +27,6 @@ class Client
 		~Client(void);
 
 		int				getFd(void);
-		
-		void			addReadBuff(std::string message);
-		void			addWriteBuff(std::string message);
-		
-		std::string&	getReadBuff(void);
-		std::string&	getWriteBuff(void);
 
 		int				getAuthorized(void);
 		void			setAuthorized(int authorized);
