@@ -136,7 +136,6 @@ void	Server::handleEvent(struct kevent &event)
 					return ;
 				
 				buff[bytes] = '\0';
-				it->second->addReadBuff(static_cast<std::string>(buff));
 				std::cout << it->first << " : " << buff;
 				// parsing string & command 동작 코드 추가
 				std::vector<std::string> token = Parsing::parsing(buff);
@@ -147,18 +146,6 @@ void	Server::handleEvent(struct kevent &event)
 			}
 		}
 
-	}
-	else if (event.filter == EVFILT_WRITE)
-	{
-		// send data to client 코드 추가 (ok)
-		std::map<int, Client*>::iterator it = _clientList.find(event.ident);
-		if (it == _clientList.end())
-			return ;
-		
-		std::string& message = it->second->getWriteBuff();
-		int bytes = send(event.ident, message.c_str(), message.length(), 0);
-		if (bytes < 0)
-			disconnectClient(event.ident);
 	}
 }
 

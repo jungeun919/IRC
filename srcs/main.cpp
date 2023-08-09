@@ -1,7 +1,13 @@
 #include "Server.hpp"
 
+void leaks(void)
+{
+	system("leaks ircserv");
+}
+
 int	main(int argc, char **argv)
 {
+	atexit(leaks);
 	if (argc != 3)
 	{
 		std::cout << "Invalid argument" << std::endl;
