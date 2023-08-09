@@ -13,48 +13,44 @@ class Client;
 
 class Channel
 {
-	private:
-		std::string				_name;
-		std::string				_key;
-		std::string				_topic;
-		std::string				_mode;
-		int						_limit;
-	
-		std::map<int, Client*>	_operatorList;
-		std::map<int, Client*>	_clientList;
+private:
+	std::string				_name;
+	std::string				_key;
+	std::string				_topic;
+	std::string				_mode;
+	int						_limit;
 
-	public:
-		Channel(std::string name);
+	std::map<int, Client*>	_operatorList;
+	std::map<int, Client*>	_clientList;
 
-		std::string&			getName(void);
-		std::string&			getTopic(void);
+public:
+	Channel(std::string name);
 
-		void					setTopic(std::string topic);
-		void					clearTopic(void);
-		
-		void					addClient(Client* client);
-		void					removeClient(int clientFd);
-		void					broadcast(std::string message);
+	std::string&			getName(void);
+	std::string 			getKey(void);
+	std::string&			getTopic(void);
+	std::string 			getMode(void);
+	int 					getLimit(void);
+	std::map<int, Client*>	getOperatorList(void);
+	std::map<int, Client*>	getClientList(void);
 
-		std::string 			getKey(void);
-		void					setKey(std::string key);
+	void					setKey(std::string key);
+	void					setTopic(std::string topic);
+	void					setMode(char mode);
+	void					setLimit(int limit);
+	void					setOperator(Client* client);
 
-		std::string 			getMode(void);
-		void					setMode(char mode);
-		void					removeMode(char mode);
+	Client*					getClientByNickname(std::string nickName);
 
-		int 					getLimit(void);
-		void					setLimit(int limit);
+	void					clearTopic(void);
+	void					addClient(Client* client);
+	void					removeClient(int clientFd);
+	void					broadcast(std::string message);
+	void					removeMode(char mode);
+	void					removeOperator(Client* client);
+	int						checkClientExistByClientFd(int clientFd);
+	int						isOperator(int clientFd);
 
-		std::map<int, Client*>	getOperatorList(void);
-		std::map<int, Client*>	getClientList(void);
-		void					setOperator(Client* client);
-		void					removeOperator(Client* client);
-
-		int						checkClientExistByClientFd(int clientFd);
-		int						isOperator(int clientFd);
-
-		Client*					getClientByNickname(std::string nickName);
 };
 
 #endif

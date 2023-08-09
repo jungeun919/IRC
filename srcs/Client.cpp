@@ -21,19 +21,9 @@ int Client::getAuthorized(void)
 	return _authorized;
 }
 
-void Client::setAuthorized(int authorized)
-{
-	_authorized = authorized;
-}
-
 std::string& Client::getUserName(void)
 {
 	return _userName;
-}
-
-void Client::setUserName(std::string userName)
-{
-	_userName = userName;
 }
 
 std::string& Client::getRealName(void)
@@ -41,24 +31,35 @@ std::string& Client::getRealName(void)
 	return _realName;
 }
 
-void Client::setRealName(std::string realName)
-{
-	_realName = realName;
-}
-
 std::string& Client::getNickName(void)
 {
 	return _nickName;
 }
 
-void Client::setNickName(std::string nickName)
-{
-	_nickName = nickName;
-}
-
 std::map<std::string, Channel*>	Client::getChannelList(void)
 {
 	return _channelList;
+}
+
+void Client::setAuthorized(int authorized)
+{
+	_authorized = authorized;
+}
+
+
+void Client::setUserName(std::string userName)
+{
+	_userName = userName;
+}
+
+void Client::setRealName(std::string realName)
+{
+	_realName = realName;
+}
+
+void Client::setNickName(std::string nickName)
+{
+	_nickName = nickName;
 }
 
 void Client::addChannel(std::string channelName, Channel* channel)

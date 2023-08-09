@@ -125,7 +125,6 @@ void	Server::handleEvent(struct kevent &event)
 			// read data from client 코드 추가 (ok)
 			char buff[BUFFER_SIZE];
 			memset(buff, 0, BUFFER_SIZE);
-
 			int bytes = recv(event.ident, buff, BUFFER_SIZE, 0);
 			if (bytes < 0)
 				disconnectClient(event.ident);
@@ -164,16 +163,15 @@ void	Server::disconnectClient(uintptr_t clientFd)
 		Channel* joinedChannel = it2->second;
 		joinedChannel->removeClient(client->getFd());
 		if (joinedChannel->getClientList().size() == 0)
+		{
 			deleteChannelByChannelName(it2->first);
+			std::cout << "Channel #" << it2->first << " deleted" << std::endl;
+		}
 	}
 	client->getChannelList().clear();
-
+	std::cout << "Client" << clientFd << " disconnected" << std::endl;
+	
 	delete client;
-}
-
-std::string Server::getPassword(void)
-{
-	return _password;
 }
 
 int Server::checkUserName(std::string userName)
@@ -224,6 +222,11 @@ int Server::checkChannelName(std::string channelName)
 	return 0;
 }
 
+std::string Server::getPassword(void)
+{
+	return _password;
+}
+
 std::map<int, Client*> Server::getClientList(void)
 {
 	return _clientList;
@@ -232,11 +235,6 @@ std::map<int, Client*> Server::getClientList(void)
 std::map<std::string, Channel*>	Server::getChannelList(void)
 {
 	return _channelList;
-}
-
-void Server::addChannel(std::string channelName)
-{
-	_channelList.insert(std::make_pair(channelName, new Channel(channelName)));
 }
 
 int Server::getFdByNickName(std::string nickName)
@@ -271,6 +269,11 @@ Client*	Server::getClientByNickname(std::string nickName)
 			return it->second;
 	}
 	return NULL;
+}
+
+void Server::addChannel(std::string channelName)
+{
+	_channelList.insert(std::make_pair(channelName, new Channel(channelName)));
 }
 
 void	Server::deleteChannelByChannelName(std::string channelName)

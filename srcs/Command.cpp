@@ -2,64 +2,34 @@
 
 void	Command::runCommand(std::vector<std::string> token, Server *server, Client *client)
 {
-	if (token[1] == "PASS") {
-		if (token.size() != 3)
-			throw std::runtime_error("Invalid argument");
-		pass(server, client, token[2]);
-	}
-	else if (token[1] == "NICK") {
-		if (token.size() != 3)
-			throw std::runtime_error("Invalid argument");
-		nick(server, client, token[2]);
-	}
-	else if (token[1] == "USER") {
-		if (token.size() != 6)
-			throw std::runtime_error("Invalid argument");
-		if (token[3] != "0" || token[4] != "*" || token[5][0] != ':')
-			throw std::runtime_error("Invalid argument");
-		user(server, client, token[2], token[5].substr(1));
-	}
-	else if (token[1] == "JOIN") {
-		if (token.size() != 3 && token.size() != 4)
-			throw std::runtime_error("Invalid argument");
-		if (token[2][0] != '#')
-			throw std::runtime_error("Invalid argument");
+	if (token[1] == "PASS")
+		pass(server, client, token);
+	else if (token[1] == "NICK")
+		nick(server, client, token);
+	else if (token[1] == "USER")
+		user(server, client, token);
+	else if (token[1] == "JOIN")
 		join(server, client, token);
-	}
-	else if (token[1] == "PRIVMSG") {
-		if (token.size() < 4)
-			throw std::runtime_error("Invalid argument");
+	else if (token[1] == "PRIVMSG")
 		privmsg(server, client, token);
-	}
-	else if (token[1] == "KICK") {
+	else if (token[1] == "KICK")
 		kick(server, client, token);
-	}
-	else if (token[1] == "INVITE") {
-		if (token.size() != 4)
-			throw std::runtime_error("Invalid argument");
-		if (token[3][0] != '#')
-			throw std::runtime_error("Invalid argument");
-		invite(server, client, token[2], token[3].substr(1));
-	}
-	else if (token[1] == "TOPIC") {
-		// TOPIC channel topic
-		if (token.size() < 3)
-			throw std::runtime_error("Invalid argument");
-		if (token[2][0] != '#')
-			throw std::runtime_error("Invalid argument");
+	else if (token[1] == "INVITE")
+		invite(server, client, token);
+	else if (token[1] == "TOPIC")
 		topic(server, client, token);
-	}
-	else if (token[1] == "MODE") {
-		if (token.size() != 4 && token.size() != 5)
-			throw std::runtime_error("Invalid argument");
+	else if (token[1] == "MODE")
 		mode(server, client, token);
-	}
 }
 
-void	Command::pass(Server *server, Client *client, std::string password)
-{	
+void	Command::pass(Server *server, Client *client, std::vector<std::string> token)
+{
+	if (token.size() != 3)
+		throw std::runtime_error("Invalid argument");
 	if (client->getAuthorized() >= 1)
 		throw std::runtime_error("Already authorized");
+	
+	std::string password = token[2];
 	if (server->getPassword() == password)
 	{
 		client->setAuthorized(1);
@@ -70,34 +40,40 @@ void	Command::pass(Server *server, Client *client, std::string password)
 		throw std::runtime_error("Wrong password");
 }
 
-void	Command::nick(Server *server, Client *client, std::string nickName)
+void	Command::nick(Server *server, Client *client, std::vector<std::string> token)
 {
+	if (token.size() != 3)
+		throw std::runtime_error("Invalid argument");
 	if (!client->getAuthorized())
 		throw std::runtime_error("Not authorized");
 	
-	if (client->getAuthorized() >= 2)
-		throw std::runtime_error("Already set NickName");
-	
+	std::string nickName = token[2];
 	if (server->checkNickName(nickName))
 		throw std::runtime_error("NickName already exist");
 	
-	client->setAuthorized(2);
+	if (client->getAuthorized() == 1)
+	{
+		client->setAuthorized(2);
+		server->sendToClient(client->getFd(), "Enter UserName  ex)USER <username> 0 * :<realname>");
+	}
 	client->setNickName(nickName);
 	std::cout << "Client" << client->getFd() << " NickName is " << nickName << std::endl;
-	server->sendToClient(client->getFd(), "Enter UserName  ex)USER <username> 0 * :<realname>");
 }
 
-void	Command::user(Server *server, Client *client, std::string userName, std::string realName)
+void	Command::user(Server *server, Client *client, std::vector<std::string> token)
 {
+	if (token.size() != 6 || token[3] != "0" || token[4] != "*" || token[5][0] != ':')
+		throw std::runtime_error("Invalid argument");
+	
 	if (client->getAuthorized() < 2)
 		throw std::runtime_error("Not authorized");
-	
 	if (client->getAuthorized() >= 3)
 		throw std::runtime_error("Already set UserName and RealName");
 
+	std::string userName = token[2];
+	std::string realName = token[5].substr(1);
 	if (server->checkUserName(userName))
 		throw std::runtime_error("UserName already exist");
-
 	if (server->checkRealName(realName))
 		throw std::runtime_error("RealName already exist");
 
@@ -111,17 +87,19 @@ void	Command::user(Server *server, Client *client, std::string userName, std::st
 
 void	Command::join(Server *server, Client *client, std::vector<std::string> token)
 {
+	if ((token.size() != 3 && token.size() != 4) || token[2][0] != '#')
+		throw std::runtime_error("Invalid argument");
 	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
 	std::vector<std::string> channelName = split(token[2], ",");
 	std::vector<std::string> key = split(token[3], ",");
 
-	//if (token.size() == 4)
-	//	key = token[3];
-
 	while (channelName.size() > key.size())
 		key.push_back("");
+
+	for (size_t i = 0; i < key.size(); i++)
+		std::cout << key[i] << std::endl;
 
 	for (size_t i = 0; i < channelName.size(); i++)
 	{
@@ -136,7 +114,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 				{
 					channel->addClient(client);
 					client->addChannel(channelName[i], channel);
-					server->sendToClient(client->getFd(), "Channel " + channelName[i] + " created");
+					server->sendToClient(client->getFd(), "Channel #" + channelName[i] + " created");
 				}
 				else
 					throw std::runtime_error("Exceed user limit");
@@ -179,23 +157,24 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 }
 
 void	Command::privmsg(Server *server, Client *client, std::vector<std::string> token)
-{
+{	
+	if (token.size() < 4 || token[3][0] != ':')
+			throw std::runtime_error("Invalid argument");
 	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
-	std::string message = client->getNickName() + ": ";
-
-	if (token[3][0] != ':')
-		throw std::runtime_error("Invalid argument");
+	
 	token[3] = token[3].substr(1);
+	std::string message = client->getNickName() + ": ";
 	
 	int i = 3;
-	while (token[i] != "")
+	while (i < static_cast<int>(token.size()))
 	{
 		message += token[i];
 		message += " ";
 		i++;
 	}
 	message += "\n";
+
 	std::string target = token[2];
 	if (target[0] == '#')
 	{
@@ -252,35 +231,50 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 	
 	// kickClients (token[3] : nickname list)
 	std::vector<std::string> kickClients = split(token[3], ",");
-	for (size_t i = 0; i < kickClients.size(); ++i) {
-   		std::cout << "kickClient: " << kickClients[i] << " ";
-	}
-	std::cout << std::endl;
-
 	std::vector<std::string>::iterator it;
+
 	for (it = kickClients.begin(); it != kickClients.end(); ++it)
 	{
 		Client* kickClient = channel->getClientByNickname(*it);
+
+		if (channel->checkClientExistByClientFd(server->getFdByNickName(*it)) == 0) {
+			std::string msg = *it + " is not in channel";
+			server->sendToClient(client->getFd(), msg);
+			continue;
+		}
 		if (!kickClient)
 			continue ;
-		if (kickClient == client)
+		if (kickClient == client) {
+			server->sendToClient(client->getFd(), "You can't kick yourself");
 			continue ;
+		}
 		channel->removeClient(kickClient->getFd());
+		server->sendToClient(kickClient->getFd(), "You are kicked from " + token[2]);
 		kickClient->removeChannel(token[2].substr(1));
-		std::cout << "kick " << kickClient->getFd() << " from " << token[2] << std::endl;
-	}
 
-	std::string message = "There is no reason\n";
-	if (token.size() == 5)
-		message = client->getNickName() + ": " + token[4].substr(1) + '\n';	
-	channel->broadcast(message);
+		std::cout << "kick " << kickClient->getFd() << " from " << token[2] << std::endl;
+		
+		std::stringstream ss;
+		ss << "Kick " << kickClient->getFd() << " from " << token[2] << "\n";
+		std::string kickMessage = ss.str();
+		channel->broadcast(kickMessage);
+
+		std::string message = "There is no reason\n";
+		if (token.size() == 5)
+			message = "Client" + client->getNickName() + " kicked because " + token[4].substr(1) + '\n';	
+		channel->broadcast(message);
+	}
 }
 
-void	Command::invite(Server *server, Client *client, std::string nickName, std::string channelName)
+void	Command::invite(Server *server, Client *client, std::vector<std::string> token)
 {
+	if (token.size() != 4 || token[3][0] != '#')
+		throw std::runtime_error("Invalid argument");
 	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
+	std::string nickName = token[2];
+	std::string channelName = token[3].substr(1);
 	// 채널명 있는지 확인
 	Channel *channel = server->getChannelByChannelName(channelName);
 	if (channel == NULL)
@@ -291,19 +285,21 @@ void	Command::invite(Server *server, Client *client, std::string nickName, std::
 		throw std::runtime_error("User is not in channel");
 	if (channel->isOperator(client->getFd()) == 0)
 		throw std::runtime_error("User is not operator");
+	if (channel->checkClientExistByClientFd(server->getFdByNickName(nickName)) == 1)
+		throw std::runtime_error("User is already in channel");
 	
-	std::cout << "channel #" << channelName << " client count: " << channel->getClientList().size() << std::endl;
 	Client* inviteClient = server->getClientByNickname(nickName);
 	if (!inviteClient)
 		return ;
 	channel->addClient(inviteClient);
-	std::cout << "channel client count: " << channel->getClientList().size() << std::endl;
+	channel->broadcast("Invite " + inviteClient->getNickName() + " to " + channelName + "\n");
+	std::cout << "channel #" << channelName << " client count: " << channel->getClientList().size() << std::endl;
 }
 
 void	Command::topic(Server *server, Client *client, std::vector<std::string> token)
 {
-	if (client->getAuthorized() < 3)
-		throw std::runtime_error("Not authorized");
+	if (token.size() < 3 || token[2][0] != '#')
+		throw std::runtime_error("Invalid argument");
 	
 	// 채널명 있는지 확인
 	Channel *channel = server->getChannelByChannelName(token[2].substr(1));
@@ -327,13 +323,15 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 	}
 	else
 	{
+		if (client->getAuthorized() < 3)
+			throw std::runtime_error("Not authorized");
 		if (token[3][0] != ':')
 			throw std::runtime_error("Invalid argument");
 		std::string topic = "";
 		token[3] = token[3].substr(1);
-	
+
 		int i = 3;
-		while (token[i] != "")
+		while (!token[i].empty())
 		{
 			topic += token[i];
 			topic += " ";
@@ -349,6 +347,8 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 
 void Command::mode(Server *server, Client *client, std::vector<std::string> token)
 {
+	if (token.size() != 4 && token.size() != 5)
+		throw std::runtime_error("Invalid argument");
 	if (token[2][0] != '#')
 		throw std::runtime_error("Invalid argument");
 	if (token[3][0] != '+' && token[3][0] != '-')
@@ -357,7 +357,6 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 		throw std::runtime_error("Invalid argument");
 	if (token[3].length() != 2)
 		throw std::runtime_error("Invalid argument");
-	
 	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	

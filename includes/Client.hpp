@@ -13,36 +13,34 @@ class Channel;
 
 class Client
 {
-	private:
-		int			_fd;
-		int 		_authorized;
-		std::string _userName;
-		std::string _realName;
-		std::string _nickName;
-	
-		std::map<std::string, Channel*> _channelList;
-	
-	public:
-		Client(int fd);
-		~Client(void);
+private:
+	int			_fd;
+	int 		_authorized;
+	std::string _userName;
+	std::string _realName;
+	std::string _nickName;
 
-		int				getFd(void);
+	std::map<std::string, Channel*> _channelList;
 
-		int				getAuthorized(void);
-		void			setAuthorized(int authorized);
+public:
+	Client(int fd);
+	~Client(void);
 
-		std::string&	getUserName(void);
-		void			setUserName(std::string userName);
+	int				getFd(void);
+	int				getAuthorized(void);
+	std::string&	getUserName(void);
+	std::string&	getRealName(void);
+	std::string&	getNickName(void);
 
-		std::string&	getRealName(void);
-		void			setRealName(std::string realName);
+	std::map<std::string, Channel*>	getChannelList(void);
 
-		std::string&	getNickName(void);
-		void			setNickName(std::string nickName);
+	void			setAuthorized(int authorized);
+	void			setUserName(std::string userName);
+	void			setRealName(std::string realName);
+	void			setNickName(std::string nickName);
 
-		std::map<std::string, Channel*>	getChannelList(void);
-		void			addChannel(std::string channelName, Channel* channel);
-		void			removeChannel(std::string channelName);
+	void			addChannel(std::string channelName, Channel* channel);
+	void			removeChannel(std::string channelName);
 };
 
 #endif
