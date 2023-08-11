@@ -12,6 +12,9 @@ std::vector<std::string> Parsing::parsing(char *buf)
 	int i = 0;
 	while (ptr != NULL)
 	{
+		std::string tokenStr = static_cast<std::string>(ptr);
+        if (!tokenStr.empty() && tokenStr.back() == '\n')
+            tokenStr.pop_back();
 		token.push_back(static_cast<std::string>(ptr));
 		if (i < 5)
 			ptr = strtok(NULL, " ");
@@ -26,6 +29,7 @@ std::vector<std::string> Parsing::parsing(char *buf)
   		if (!lastElement.empty())
     		lastElement = lastElement.substr(0, lastElement.size() - 1);
 	}
+	
 	return token;
 }
 

@@ -93,13 +93,12 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 		throw std::runtime_error("Not authorized");
 	
 	std::vector<std::string> channelName = split(token[2], ",");
-	std::vector<std::string> key = split(token[3], ",");
+	std::vector<std::string> key;
+	if (!token[3].empty())
+		key = split(token[3], ",");
 
 	while (channelName.size() > key.size())
 		key.push_back("");
-
-	for (size_t i = 0; i < key.size(); i++)
-		std::cout << key[i] << std::endl;
 
 	for (size_t i = 0; i < channelName.size(); i++)
 	{
@@ -109,7 +108,10 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 			{
 				server->addChannel(channelName[i]);
 				Channel *channel = server->getChannelByChannelName(channelName[i]);
-				channel->setKey(key[i]);
+				if (token.size() == 4)
+					channel->setKey(key[i]);
+				else
+					channel->setKey("");
 				if (channel->getLimit() == -1 || channel->getLimit() > static_cast<int>(channel->getClientList().size()))
 				{
 					channel->addClient(client);
@@ -127,7 +129,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 				if (channel->getMode().find('i') != std::string::npos)
 					throw std::runtime_error("Channel is set to INVITE-ONLY mode");
 				
-				if (channel->getKey() == key[i])
+				if ((token.size() == 4) ? channel->getKey() == key[i]: true)
 				{
 					if (channel->checkClientExistByClientFd(client->getFd()))
 						throw std::runtime_error("Already joined channel");

@@ -143,6 +143,7 @@ void	Server::handleEvent(struct kevent &event)
 			else
 				throw std::runtime_error("not command");
 			}
+			memset(buff, 0, BUFFER_SIZE);
 		}
 
 	}
