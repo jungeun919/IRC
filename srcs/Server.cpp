@@ -137,14 +137,22 @@ void	Server::handleEvent(struct kevent &event)
 				
 				buff[bytes] = '\0';
 				std::cout << it->first << " : " << buff;
+				it->second->addReadBuff(static_cast<std::string>(buff));
+
+				std::string& readBuff = it->second->getReadBuff();
+				size_t crlfPos = std::min(readBuff.find('\r'), readBuff.find('\n'));
+				if (crlfPos != std::string::npos)
+					readBuff = readBuff.substr(0, crlfPos);
+				
 				// parsing string & command 동작 코드 추가
-				std::vector<std::string> token = Parsing::parsing(buff);
-			if (token[0] == "1")
-				Command::runCommand(token, this, it->second);
-			else
-				throw std::runtime_error("not command");
+				std::vector<std::string> token = Parsing::parsing(readBuff);
+				
+				readBuff.erase(0, bytes);
+				if (Parsing::checkCommand(token[0]) == 1)
+					Command::runCommand(token, this, it->second);
+				else
+					throw std::runtime_error("not command");
 			}
-			memset(buff, 0, BUFFER_SIZE);
 		}
 	}
 	else if (event.filter == EVFILT_WRITE)

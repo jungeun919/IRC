@@ -1,35 +1,9 @@
 #include "Parsing.hpp"
+#include "Command.hpp"
 
-std::vector<std::string> Parsing::parsing(char *buf)
+std::vector<std::string> Parsing::parsing(std::string command)
 {
-	std::vector<std::string> token;
-	char *ptr = strtok(buf, " ");
-	if (checkCommand(ptr))
-		token.push_back("1");
-	else
-		token.push_back("0");
-	
-	int i = 0;
-	while (ptr != NULL)
-	{
-		std::string tokenStr = static_cast<std::string>(ptr);
-        if (!tokenStr.empty() && tokenStr.back() == '\n')
-            tokenStr.pop_back();
-		token.push_back(static_cast<std::string>(ptr));
-		if (i < 5)
-			ptr = strtok(NULL, " ");
-		else
-			ptr = strtok(NULL, "");
-		i++;
-	}
-
-	if (!token.empty())
-	{
-  		std::string& lastElement = token.back();
-  		if (!lastElement.empty())
-    		lastElement = lastElement.substr(0, lastElement.size() - 1);
-	}
-	
+	std::vector<std::string> token = Command::split(command, ' ');
 	return token;
 }
 
