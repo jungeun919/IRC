@@ -33,7 +33,7 @@ void	Command::pass(Server *server, Client *client, std::vector<std::string> toke
 	if (server->getPassword() == password)
 	{
 		client->setAuthorized(1);
-		server->sendToClient(client->getFd(), "Enter NickName  ex)NICK <nickname>");
+		server->noticeToClient(client->getFd(), "Enter NickName  ex)NICK <nickname>");
 		std::cout << "Client" << client->getFd() << " Login Success" << std::endl;
 	}
 	else
@@ -54,7 +54,7 @@ void	Command::nick(Server *server, Client *client, std::vector<std::string> toke
 	if (client->getAuthorized() == 1)
 	{
 		client->setAuthorized(2);
-		server->sendToClient(client->getFd(), "Enter UserName  ex)USER <username> 0 * :<realname>");
+		server->noticeToClient(client->getFd(), "Enter UserName  ex)USER <username> 0 * :<realname>");
 	}
 	client->setNickName(nickName);
 	std::cout << "Client" << client->getFd() << " NickName is " << nickName << std::endl;
@@ -82,7 +82,7 @@ void	Command::user(Server *server, Client *client, std::vector<std::string> toke
 	client->setRealName(realName);
 	std::cout << "Client" << client->getFd() << " UserName is " << userName << std::endl;
 	std::cout << "Client" << client->getFd() << " RealName is " << realName << std::endl;
-	server->sendToClient(client->getFd(), "Welcome to the Internet Relay Network " + client->getNickName() + "!" + client->getUserName() + "@irc.42.fr");
+	server->noticeToClient(client->getFd(), "Welcome to the Internet Relay Network " + client->getNickName() + "!" + client->getUserName() + "@irc.42.fr");
 }
 
 void	Command::join(Server *server, Client *client, std::vector<std::string> token)
@@ -116,7 +116,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 				{
 					channel->addClient(client);
 					client->addChannel(channelName[i], channel);
-					server->sendToClient(client->getFd(), "Channel #" + channelName[i] + " created");
+					server->noticeToClient(client->getFd(), "Channel #" + channelName[i] + " created");
 				}
 				else
 					throw std::runtime_error("Exceed user limit");
@@ -137,11 +137,11 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 					{
 						std::map<int, Client*> clientList = channel->getClientList();
 						for (std::map<int, Client*>::iterator it = clientList.begin(); it != clientList.end(); it++)
-							server->sendToClient(it->first, client->getNickName() + " has joined Channel #" + channelName[i]);
+							server->noticeToClient(it->first, client->getNickName() + " has joined Channel #" + channelName[i]);
 
 						channel->addClient(client);
 						client->addChannel(channelName[i], channel);
-						server->sendToClient(client->getFd(), "Channel #" + channelName[i] + " joined");
+						server->noticeToClient(client->getFd(), "Channel #" + channelName[i] + " joined");
 					}
 					else
 						throw std::runtime_error("Exceed user limit");
@@ -153,7 +153,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 		catch (std::exception &e) {
 			std::string msg = "Channel #" + channelName[i] + " " + e.what();
 			std::cout << "Client" << client->getFd() << " " << msg << std::endl;
-			server->sendToClient(client->getFd(), msg);
+			server->noticeToClient(client->getFd(), msg);
 		}
 	}
 }
@@ -191,8 +191,7 @@ void	Command::privmsg(Server *server, Client *client, std::vector<std::string> t
 		std::map<int, Client*>::iterator it = clientList.begin();
 		while (it != clientList.end())
 		{
-			if (!send((*it).second->getFd(), message.c_str(), message.length(), 0))
-				throw std::runtime_error("User not connected");
+			it->second->addWriteBuff(message);
 			it++;
 		}
 	}
@@ -200,8 +199,9 @@ void	Command::privmsg(Server *server, Client *client, std::vector<std::string> t
 	{
 		if (!server->checkNickName(target) || server->getClientByNickname(target)->getAuthorized() < 3)
 			throw std::runtime_error("User doesn't exist");
-		if (!send(server->getFdByNickName(target), message.c_str(), message.length(), 0))
-			throw std::runtime_error("User not connected");
+		
+		Client *client = server->getClientByNickname(target);
+		client->addWriteBuff(message);
 	}
 }
 
@@ -241,17 +241,17 @@ void	Command::kick(Server *server, Client *client, std::vector<std::string> toke
 
 		if (channel->checkClientExistByClientFd(server->getFdByNickName(*it)) == 0) {
 			std::string msg = *it + " is not in channel";
-			server->sendToClient(client->getFd(), msg);
+			server->noticeToClient(client->getFd(), msg);
 			continue;
 		}
 		if (!kickClient)
 			continue ;
 		if (kickClient == client) {
-			server->sendToClient(client->getFd(), "You can't kick yourself");
+			server->noticeToClient(client->getFd(), "You can't kick yourself");
 			continue ;
 		}
 		channel->removeClient(kickClient->getFd());
-		server->sendToClient(kickClient->getFd(), "You are kicked from " + token[2]);
+		server->noticeToClient(kickClient->getFd(), "You are kicked from " + token[2]);
 		kickClient->removeChannel(token[2].substr(1));
 
 		std::cout << "kick " << kickClient->getFd() << " from " << token[2] << std::endl;
@@ -320,8 +320,7 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 	if (token.size() == 3)
 	{
 		std::string message = channel->getTopic() + "\n";
-		if (!send(client->getFd(), message.c_str(), message.length(), 0))
-			throw std::runtime_error("User not connected");
+		client->addWriteBuff(message);
 	}
 	else
 	{

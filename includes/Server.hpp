@@ -63,7 +63,7 @@ public:
 
 	void	addChannel(std::string channelName);
 	void	deleteChannelByChannelName(std::string channelName);
-	void	sendToClient(int fd, std::string msg);
+	void	noticeToClient(int fd, std::string msg);
 };
 
 #endif

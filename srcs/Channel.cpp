@@ -100,10 +100,7 @@ void	Channel::broadcast(std::string message)
 {
 	std::map<int, Client*>::iterator it;
 	for (it = _clientList.begin(); it != _clientList.end(); ++it)
-	{
-		if (send(it->second->getFd(), message.c_str(), message.length(), 0) == -1)
-			throw std::runtime_error("User not connected");
-	}
+		it->second->addWriteBuff(message);
 }
 
 void	Channel::removeMode(char mode)

@@ -78,7 +78,7 @@ void	Server::run(void)
 			{
 				std::cout << "Client" << _eventList[i].ident << " " << e.what() << std::endl;
 				std::string msg = e.what();
-				sendToClient(_eventList[i].ident, msg);
+				noticeToClient(_eventList[i].ident, msg);
 			}
 		}
 	}
@@ -113,12 +113,13 @@ void	Server::handleEvent(struct kevent &event)
 			
 			// add event for client socket
 			addEvents(client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-			addEvents(client_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+			addEvents(client_socket, EVFILT_WRITE, EV_ADD | EV_UDATA_SPECIFIC, 0, 0, NULL);
+
 			// client 동작 추가 (ok)
 			Client* client = new Client(client_socket);
 			_clientList.insert(std::make_pair(client_socket, client));
 			std::cout << "Client" << client_socket << " connected" << std::endl;
-			sendToClient(client_socket, "Enter Password  ex)PASS <password>");
+			noticeToClient(client_socket, "Enter Password  ex)PASS <password>");
 		}
 		else
 		{
@@ -145,7 +146,23 @@ void	Server::handleEvent(struct kevent &event)
 			}
 			memset(buff, 0, BUFFER_SIZE);
 		}
+	}
+	else if (event.filter == EVFILT_WRITE)
+	{
+		// send data to client
+		std::map<int, Client*>::iterator it = _clientList.find(event.ident);
+		if (it == _clientList.end())
+			return ;
 
+		Client *client = it->second;
+		if (client->getWriteBuff().empty())
+			return ;
+		
+		std::string& message = client->getWriteBuff();
+		int bytes = send(event.ident, message.c_str(), message.length(), 0);
+		if (bytes < 0)
+			disconnectClient(event.ident);
+		message.erase(0, bytes);
 	}
 }
 
@@ -286,11 +303,11 @@ void	Server::deleteChannelByChannelName(std::string channelName)
 	delete it->second;
 }
 
-void	Server::sendToClient(int fd, std::string message)
+void	Server::noticeToClient(int fd, std::string message)
 {
 	std::map<int, Client*>::iterator it = _clientList.find(fd);
 	if (it == _clientList.end())
 		return ;
 	message = "[Server] " + message + "\n";
-	send(fd, message.c_str(), message.length(), 0);
+	it->second->addWriteBuff(message);
 }

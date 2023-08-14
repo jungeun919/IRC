@@ -36,6 +36,16 @@ std::string& Client::getNickName(void)
 	return _nickName;
 }
 
+std::string& Client::getReadBuff(void)
+{
+	return _readBuff;
+}
+
+std::string& Client::getWriteBuff(void)
+{
+	return _writeBuff;
+}
+
 std::map<std::string, Channel*>	Client::getChannelList(void)
 {
 	return _channelList;
@@ -60,6 +70,16 @@ void Client::setRealName(std::string realName)
 void Client::setNickName(std::string nickName)
 {
 	_nickName = nickName;
+}
+
+void Client::addReadBuff(std::string message)
+{
+	_readBuff += message;
+}
+
+void Client::addWriteBuff(std::string message)
+{
+	_writeBuff += message;
 }
 
 void Client::addChannel(std::string channelName, Channel* channel)
