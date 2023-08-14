@@ -148,10 +148,9 @@ void	Server::handleEvent(struct kevent &event)
 				std::vector<std::string> token = Parsing::parsing(readBuff);
 				
 				readBuff.erase(0, bytes);
-				if (Parsing::checkCommand(token[0]) == 1)
-					Command::runCommand(token, this, it->second);
-				else
-					throw std::runtime_error("not command");
+				if (!token.empty())
+					if (Parsing::checkCommand(token[0]) == 1)
+						Command::runCommand(token, this, it->second);
 			}
 		}
 	}

@@ -28,6 +28,7 @@ public:
 	static void mode(Server *server, Client *client, std::vector<std::string> token);
 
 	static std::vector<std::string>	split(std::string str, char delimiter);
+	static std::vector<std::string>	key_split(std::string str, char delimiter);
 };
 
 #endif

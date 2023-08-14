@@ -95,7 +95,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 	std::vector<std::string> channelName = split(token[1], ',');
 	std::vector<std::string> key;
 	if (!token[2].empty())
-		key = split(token[2], ',');
+		key = Command::key_split(token[2], ',');
 
 	while (channelName.size() > key.size())
 		key.push_back("");
@@ -436,6 +436,20 @@ std::vector<std::string>	Command::split(std::string str, char delimiter)
 	{
 		if (pos != 0)
 			ret.push_back(str.substr(0, pos));
+		str.erase(0, pos + 1);
+	}
+	if (!str.empty())
+		ret.push_back(str);
+	return ret;
+}
+
+std::vector<std::string>	Command::key_split(std::string str, char delimiter)
+{
+	std::vector<std::string> ret;
+	size_t pos = 0;
+	while ((pos = str.find(delimiter)) != std::string::npos)
+	{
+		ret.push_back(str.substr(0, pos));
 		str.erase(0, pos + 1);
 	}
 	if (!str.empty())
