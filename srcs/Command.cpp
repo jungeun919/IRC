@@ -129,7 +129,7 @@ void	Command::join(Server *server, Client *client, std::vector<std::string> toke
 				if (channel->getMode().find('i') != std::string::npos)
 					throw std::runtime_error("Channel is set to INVITE-ONLY mode");
 				
-				if ((token.size() == 4) ? channel->getKey() == key[i]: true)
+				if ((token.size() == 4) ? channel->getKey() == key[i]: channel->getKey() == "")
 				{
 					if (channel->checkClientExistByClientFd(client->getFd()))
 						throw std::runtime_error("Already joined channel");

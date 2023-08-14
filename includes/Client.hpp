@@ -21,7 +21,6 @@ private:
 	std::string _nickName;
 
 	std::map<std::string, Channel*> _channelList;
-
 public:
 	Client(int fd);
 	~Client(void);
