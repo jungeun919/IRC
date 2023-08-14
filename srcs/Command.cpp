@@ -353,12 +353,6 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 		throw std::runtime_error("Invalid argument");
 	if (token[1][0] != '#')
 		throw std::runtime_error("Invalid argument");
-	if (token[2][0] != '+' && token[2][0] != '-')
-		throw std::runtime_error("Invalid argument");
-	if (token[2][1] != 'i' && token[2][1] != 't' && token[2][1] != 'k' && token[2][1] != 'o' && token[2][1] != 'l')
-		throw std::runtime_error("Invalid argument");
-	if (token[2].length() != 2)
-		throw std::runtime_error("Invalid argument");
 	if (client->getAuthorized() < 3)
 		throw std::runtime_error("Not authorized");
 	
@@ -370,61 +364,96 @@ void Command::mode(Server *server, Client *client, std::vector<std::string> toke
 	// 입력 유저가 channel에 있는지, operator인지 확인
 	if (channel->isOperator(client->getFd()) == 0)
 		throw std::runtime_error("User is not operator");
-	if (token[2][1] == 'o')
-		if (channel->getClientByNickname(token[3]) == NULL)
-			throw std::runtime_error("User is not in channel");
-	
+	std::vector<std::string> args;
+	int size = 0;
+	if (token.size() == 4)
+	{
+		args = split(token[3], ',');
+		size = args.size();
+	}
 
-	if (token[2][1] == 'i')
+	int i = 0;
+	int j = 0;
+	int flag = -1;
+	int visited[7] = {0, 0, 0, 0, 0, 0, 0};
+	while (token[2][i])
 	{
-		if (token[2][0] == '+')
-			channel->setMode('i');
-		else
-			channel->removeMode('i');
-	}
-	else if (token[2][1] == 't')
-	{
-		if (token[2][0] == '+')
-			channel->setMode('t');
-		else
-			channel->removeMode('t');
-	}
-	if (token[2][1] == 'k')
-	{
-		if (token[2][0] == '+')
-			channel->setKey(token[3]);
-		else
+		if (token[2][i] != '+' && token[2][i] != '-' && token[2][i] != 'i' && token[2][i] != 't' && token[2][i] != 'k' && token[2][i] != 'o' && token[2][i] != 'l')
+			throw std::runtime_error("Invalid argument");
+
+		if (token[2][i] == 'i' && !visited[0])
 		{
-			if (token.size() != 3)
+			visited[0] = 1;
+			if (flag)
+				channel->setMode('i');
+			else
+				channel->removeMode('i');
+		}
+		else if (token[2][i] == 't' && !visited[1])
+		{
+			visited[1] = 1;
+			if (flag)
+				channel->setMode('t');
+			else
+				channel->removeMode('t');
+		}
+		else if (token[2][i] == 'k' && !visited[2])
+		{
+			visited[2] = 1;
+			if (flag)
+			{
+				if (j >= size || args[j].empty())
+					throw std::runtime_error("Invalid argument");
+				channel->setKey(args[j++]);
+			}
+			else
+				channel->setKey("");
+		}
+		else if (token[2][i] == 'o' && !visited[3])
+		{
+			visited[3] = 1;
+			if (j >= size || args[j].empty())
 				throw std::runtime_error("Invalid argument");
-			channel->setKey("");
+			Client *opClient = channel->getClientByNickname(args[j++]);
+			if (opClient == NULL)
+				throw std::runtime_error("User is not in channel");
+			if (flag)
+				channel->setOperator(opClient);
+			else
+				channel->removeOperator(opClient);
 		}
-	}
-	else if (token[2][1] == 'o')
-	{
-		Client *opClient = channel->getClientByNickname(token[3]);
-		if (token[2][0] == '+')
-			channel->setOperator(opClient);
-		else
-			channel->removeOperator(opClient);
-	}
-	else if (token[2][1] == 'l')
-	{
-		if (token[2][0] == '+')
+		else if (token[2][i] == 'l' && !visited[4])
 		{
-			channel->setMode('l');
-			int limit = atoi(token[3].c_str());
-			if (limit < 0)
-				return;
-			channel->setLimit(limit);
+			visited[4] = 1;
+			if (flag)
+			{
+				if (j >= size || args[j].empty())
+					throw std::runtime_error("Invalid argument");
+				channel->setMode('l');
+				int limit = atoi(args[j++].c_str());
+				if (limit < 0)
+					return;
+				channel->setLimit(limit);
+			}
+			else
+			{
+				channel->removeMode('l');
+				channel->setLimit(-1);
+			}
+		}
+		else if (token[2][i] == '+' && !visited[5])
+		{
+			flag = 1;
+			visited[5] = 1;
+		}
+		else if (token[2][i] == '-' && !visited[6])
+		{
+			flag = 0;
+			visited[6] = 1;
 		}
 		else
-		{
-			if (token.size() != 3)
-				throw std::runtime_error("Invalid argument");
-			channel->removeMode('l');
-			channel->setLimit(-1);
-		}
+			throw std::runtime_error("Invalid argument");
+		i++;
 	}
 }
 
