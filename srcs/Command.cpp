@@ -311,11 +311,6 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 	// 입력 유저가 channel에 있는지, operator인지, channel mode에 't' 있는지 확인
 	if (channel->checkClientExistByClientFd(client->getFd()) == 0)
 		throw std::runtime_error("User is not in channel");
-	if (channel->getMode().find('t') != std::string::npos)
-	{
-		if (channel->isOperator(client->getFd()) == 0)
-			throw std::runtime_error("User is not operator");
-	}
 
 	if (token.size() == 3)
 	{
@@ -328,6 +323,12 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 			throw std::runtime_error("Not authorized");
 		if (token[3][0] != ':')
 			throw std::runtime_error("Invalid argument");
+		if (channel->getMode().find('t') != std::string::npos)
+		{
+			if (channel->isOperator(client->getFd()) == 0)
+				throw std::runtime_error("User is not operator");
+		}
+		
 		std::string topic = "";
 		token[3] = token[3].substr(1);
 
