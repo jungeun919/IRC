@@ -168,8 +168,8 @@ void	Command::privmsg(Server *server, Client *client, std::vector<std::string> t
 	token[2] = token[2].substr(1);
 	std::string message = client->getNickName() + ": ";
 	
-	int i = 2;
-	while (i < static_cast<int>(token.size()))
+	size_t i = 2;
+	while (i < token.size())
 	{
 		message += token[i];
 		message += " ";
@@ -332,8 +332,8 @@ void	Command::topic(Server *server, Client *client, std::vector<std::string> tok
 		std::string topic = "";
 		token[2] = token[2].substr(1);
 
-		int i = 2;
-		while (!token[i].empty())
+		size_t i = 2;
+		while (i < token.size())
 		{
 			topic += token[i];
 			topic += " ";
