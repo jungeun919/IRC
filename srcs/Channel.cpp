@@ -93,6 +93,8 @@ void	Channel::addClient(Client* client)
 
 void	Channel::removeClient(int clientFd)
 {
+	if (isOperator(clientFd))
+		_operatorList.erase(clientFd);
 	_clientList.erase(clientFd);
 }
 
