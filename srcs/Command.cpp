@@ -277,6 +277,10 @@ void	Command::invite(Server *server, Client *client, std::vector<std::string> to
 	
 	std::string nickName = token[1];
 	std::string channelName = token[2].substr(1);
+	// 해당 유저 있는지 확인
+	Client *target = server->getClientByNickname(nickName);
+	if (target == NULL)
+		throw std::runtime_error("Target user doesn't exist");
 	// 채널명 있는지 확인
 	Channel *channel = server->getChannelByChannelName(channelName);
 	if (channel == NULL)
